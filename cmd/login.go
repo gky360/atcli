@@ -16,9 +16,25 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 
+	. "github.com/gky360/atcli/constants"
+	"github.com/gky360/atsrv/models"
+	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
 )
+
+type LoginOptions struct {
+	Out, ErrOut io.Writer
+
+	UserID string
+}
+
+var options = &LoginOptions{
+	Out:    os.Stdout,
+	ErrOut: os.Stderr,
+}
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
@@ -31,12 +47,15 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("login called")
+		options.Run(cmd, args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
+
+	loginCmd.Flags().StringVarP(&options.UserID, "user", "u", options.UserID, "User name for AtCoder")
+	loginCmd.MarkFlagRequired("user")
 
 	// Here you will define your flags and configuration settings.
 
@@ -47,4 +66,23 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func (options *LoginOptions) Run(cmd *cobra.Command, args []string) error {
+	fmt.Fprintf(options.Out, "loginCmd user: %s\n", options.UserID)
+
+	fmt.Print("Password: ")
+	pass, err := gopass.GetPasswd()
+	if err != nil {
+		return err
+	}
+
+	_, err = Client.R().
+		SetBody(models.User{ID: options.UserID, Password: string(pass)}).
+		Post("/login")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
