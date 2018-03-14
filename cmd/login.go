@@ -23,6 +23,7 @@ import (
 	"github.com/gky360/atsrv/models"
 	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type LoginOptions struct {
@@ -47,14 +48,16 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		options.Run(cmd, args)
+		if err := options.Run(cmd, args); err != nil {
+			fmt.Fprintln(options.ErrOut, err)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&options.UserID, "user", "u", options.UserID, "User name for AtCoder")
+	loginCmd.Flags().StringVarP(&options.UserID, "user", "u", "", "User name for AtCoder")
 	loginCmd.MarkFlagRequired("user")
 
 	// Here you will define your flags and configuration settings.
@@ -68,8 +71,8 @@ func init() {
 	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (options *LoginOptions) Run(cmd *cobra.Command, args []string) error {
-	fmt.Fprintf(options.Out, "loginCmd user: %s\n", options.UserID)
+func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) error {
+	fmt.Fprintf(opt.Out, "loginCmd user: %s\n", opt.UserID)
 
 	fmt.Print("Password: ")
 	pass, err := gopass.GetPasswd()
@@ -77,10 +80,17 @@ func (options *LoginOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	user := new(models.User)
 	_, err = Client.R().
-		SetBody(models.User{ID: options.UserID, Password: string(pass)}).
+		SetBody(models.User{ID: opt.UserID, Password: string(pass)}).
+		SetResult(&user).
 		Post("/login")
 	if err != nil {
+		return err
+	}
+
+	viper.Set("user", user)
+	if err = viper.WriteConfig(); err != nil {
 		return err
 	}
 
