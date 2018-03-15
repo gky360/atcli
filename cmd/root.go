@@ -19,6 +19,7 @@ import (
 	"os"
 	"path/filepath"
 
+	. "github.com/gky360/atcli/constants"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -96,4 +97,10 @@ func initConfig() {
 		os.Exit(1)
 	}
 	fmt.Println("Using config file:", viper.ConfigFileUsed())
+
+	// set access token to http client
+	userToken := viper.GetString("user.token")
+	if userToken != "" {
+		Client.SetAuthToken(userToken)
+	}
 }

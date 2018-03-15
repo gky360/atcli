@@ -32,29 +32,29 @@ type LoginOptions struct {
 	UserID string
 }
 
-var options = &LoginOptions{
-	Out:    os.Stdout,
-	ErrOut: os.Stderr,
-}
+func init() {
+	options := &LoginOptions{
+		Out:    os.Stdout,
+		ErrOut: os.Stderr,
+	}
 
-// loginCmd represents the login command
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
+	// loginCmd represents the login command
+	loginCmd := &cobra.Command{
+		Use:   "login",
+		Short: "A brief description of your command",
+		Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := options.Run(cmd, args); err != nil {
-			fmt.Fprintln(options.ErrOut, err)
-		}
-	},
-}
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := options.Run(cmd, args); err != nil {
+				fmt.Fprintln(options.ErrOut, err)
+			}
+		},
+	}
 
-func init() {
 	rootCmd.AddCommand(loginCmd)
 
 	loginCmd.Flags().StringVarP(&options.UserID, "user", "u", "", "User name for AtCoder")
@@ -71,7 +71,7 @@ func init() {
 	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) error {
+func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	fmt.Fprintf(opt.Out, "loginCmd user: %s\n", opt.UserID)
 
 	fmt.Print("Password: ")
@@ -89,7 +89,8 @@ func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	viper.Set("user", user)
+	viper.Set("user.id", user.ID)
+	viper.Set("user.token", user.Token)
 	if err = viper.WriteConfig(); err != nil {
 		return err
 	}
