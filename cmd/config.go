@@ -19,27 +19,23 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
-	"github.com/gky360/atsrv/models"
-	"github.com/howeyc/gopass"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
-type LoginOptions struct {
+type ConfigOptions struct {
 	Out, ErrOut io.Writer
-
-	UserID string
 }
 
-var loginOpt = &LoginOptions{
+var configOpt = &ConfigOptions{
 	Out:    os.Stdout,
 	ErrOut: os.Stderr,
 }
 
-// loginCmd represents the login command
-var loginCmd = &cobra.Command{
-	Use:   "login",
+// configCmd represents the config command
+var configCmd = &cobra.Command{
+	Use:   "config",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -48,53 +44,43 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := loginOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(loginOpt.ErrOut, err)
+		if err := configOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(configOpt.ErrOut, err)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
-
-	loginCmd.Flags().StringVarP(&loginOpt.UserID, "user", "u", "", "User name for AtCoder")
-	loginCmd.MarkFlagRequired("user")
+	rootCmd.AddCommand(configCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// loginCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// configCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// configCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) (err error) {
-	fmt.Fprintf(opt.Out, "loginCmd user: %s\n", opt.UserID)
+func (opt *ConfigOptions) Run(cmd *cobra.Command, args []string) (err error) {
+	fmt.Fprintln(opt.Out, "confingCmd")
 
-	fmt.Print("Password: ")
-	pass, err := gopass.GetPasswd()
-	if err != nil {
-		return err
-	}
-
-	user := new(models.User)
-	_, err = Client.R().
-		SetBody(models.User{ID: opt.UserID, Password: string(pass)}).
-		SetResult(&user).
-		Post("/login")
-	if err != nil {
-		return err
-	}
-
-	viper.Set("user.token", user.Token)
 	if err = viper.WriteConfig(); err != nil {
 		return err
 	}
 
-	fmt.Fprintln(opt.Out, "Successfully logged in.")
+	var config interface{}
+	if err = viper.Unmarshal(&config); err != nil {
+		return err
+	}
+	d, err := yaml.Marshal(&config)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(opt.Out, "---\n%s\n", string(d))
 
 	return nil
 }
