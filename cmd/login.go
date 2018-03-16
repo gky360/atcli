@@ -32,32 +32,32 @@ type LoginOptions struct {
 	UserID string
 }
 
-func init() {
-	options := &LoginOptions{
-		Out:    os.Stdout,
-		ErrOut: os.Stderr,
-	}
+var loginOpt = &LoginOptions{
+	Out:    os.Stdout,
+	ErrOut: os.Stderr,
+}
 
-	// loginCmd represents the login command
-	loginCmd := &cobra.Command{
-		Use:   "login",
-		Short: "A brief description of your command",
-		Long: `A longer description that spans multiple lines and likely contains examples
+// loginCmd represents the login command
+var loginCmd = &cobra.Command{
+	Use:   "login",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := options.Run(cmd, args); err != nil {
-				fmt.Fprintln(options.ErrOut, err)
-			}
-		},
-	}
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := loginOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(loginOpt.ErrOut, err)
+		}
+	},
+}
 
+func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&options.UserID, "user", "u", "", "User name for AtCoder")
+	loginCmd.Flags().StringVarP(&loginOpt.UserID, "user", "u", "", "User name for AtCoder")
 	loginCmd.MarkFlagRequired("user")
 
 	// Here you will define your flags and configuration settings.

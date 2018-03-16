@@ -29,29 +29,29 @@ type LogoutOptions struct {
 	Out, ErrOut io.Writer
 }
 
-func init() {
-	options := &LogoutOptions{
-		Out:    os.Stdout,
-		ErrOut: os.Stderr,
-	}
+var logoutOpt = &LogoutOptions{
+	Out:    os.Stdout,
+	ErrOut: os.Stderr,
+}
 
-	// logoutCmd represents the logout command
-	logoutCmd := &cobra.Command{
-		Use:   "logout",
-		Short: "A brief description of your command",
-		Long: `A longer description that spans multiple lines and likely contains examples
+// logoutCmd represents the logout command
+var logoutCmd = &cobra.Command{
+	Use:   "logout",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := options.Run(cmd, args); err != nil {
-				fmt.Fprintln(options.ErrOut, err)
-			}
-		},
-	}
+	Run: func(cmd *cobra.Command, args []string) {
+		if err := logoutOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(logoutOpt.ErrOut, err)
+		}
+	},
+}
 
+func init() {
 	rootCmd.AddCommand(logoutCmd)
 
 	// Here you will define your flags and configuration settings.

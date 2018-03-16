@@ -29,10 +29,16 @@ import (
 type RootOptions struct {
 	Out, ErrOut io.Writer
 
-	ContestID string
+	cfgFile   string
+	contestID string
 }
 
 var cfgFile string
+
+var rootOpt = &RootOptions{
+	Out:    os.Stdout,
+	ErrOut: os.Stderr,
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -59,18 +65,13 @@ func Execute() {
 }
 
 func init() {
-	options := &RootOptions{
-		Out:    os.Stdout,
-		ErrOut: os.Stderr,
-	}
-
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atcli.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&options.ContestID, "contest", "c", "", "contest id")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 
 	// Cobra also supports local flags, which will only run
