@@ -69,9 +69,7 @@ func (opt *LogoutOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	fmt.Fprintln(opt.Out, "logoutCmd")
 
 	user := new(models.User)
-	_, err = Client.R().
-		SetResult(&user).
-		Post("/logout")
+	_, err = Client.Logout(user)
 	if err != nil {
 		return err
 	}

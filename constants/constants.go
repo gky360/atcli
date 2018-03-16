@@ -1,10 +1,7 @@
 package constants
 
 import (
-	"fmt"
-	"net/http"
-
-	"gopkg.in/resty.v1"
+	"github.com/gky360/atcli/client"
 )
 
 const (
@@ -12,14 +9,5 @@ const (
 )
 
 var (
-	Client = resty.
-		SetHostURL(APIHost).
-		OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
-			fmt.Printf("Status: %v\n", resp.Status())
-			fmt.Printf("Body:   %v\n", resp)
-			if resp.StatusCode() != http.StatusOK {
-				return fmt.Errorf("atsrv returned an error: %s\n%v", resp.Status(), resp)
-			}
-			return nil
-		})
+	Client = client.NewClient(APIHost)
 )

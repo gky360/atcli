@@ -29,7 +29,7 @@ import (
 type LoginOptions struct {
 	Out, ErrOut io.Writer
 
-	UserID string
+	userID string
 }
 
 var loginOpt = &LoginOptions{
@@ -57,7 +57,7 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(loginCmd)
 
-	loginCmd.Flags().StringVarP(&loginOpt.UserID, "user", "u", "", "User name for AtCoder")
+	loginCmd.Flags().StringVarP(&loginOpt.userID, "user", "u", "", "User name for AtCoder")
 	loginCmd.MarkFlagRequired("user")
 
 	// Here you will define your flags and configuration settings.
@@ -72,7 +72,7 @@ func init() {
 }
 
 func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) (err error) {
-	fmt.Fprintf(opt.Out, "loginCmd user: %s\n", opt.UserID)
+	fmt.Fprintf(opt.Out, "loginCmd user: %s\n", opt.userID)
 
 	fmt.Print("Password: ")
 	pass, err := gopass.GetPasswd()
@@ -81,10 +81,7 @@ func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	user := new(models.User)
-	_, err = Client.R().
-		SetBody(models.User{ID: opt.UserID, Password: string(pass)}).
-		SetResult(&user).
-		Post("/login")
+	_, err = Client.Login(opt.userID, string(pass), user)
 	if err != nil {
 		return err
 	}
