@@ -22,6 +22,7 @@ import (
 	. "github.com/gky360/atcli/constants"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type LogoutOptions struct {
@@ -72,6 +73,11 @@ func (opt *LogoutOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		SetResult(&user).
 		Post("/logout")
 	if err != nil {
+		return err
+	}
+
+	viper.Set("user.token", "")
+	if err = viper.WriteConfig(); err != nil {
 		return err
 	}
 

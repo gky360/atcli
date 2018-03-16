@@ -89,7 +89,6 @@ func (opt *LoginOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	viper.Set("user.id", user.ID)
 	viper.Set("user.token", user.Token)
 	if err = viper.WriteConfig(); err != nil {
 		return err
