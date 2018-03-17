@@ -73,7 +73,7 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetTasks(contestID string, tasks []models.Task) (*resty.Response, error) {
+func (c *AtcliClient) GetTasks(contestID string, tasks *[]models.Task) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
 	}
@@ -83,7 +83,7 @@ func (c *AtcliClient) GetTasks(contestID string, tasks []models.Task) (*resty.Re
 	resp, err := c.client.R().
 		SetResult(&rspGetTasks).
 		Get(endpoint)
-	tasks = rspGetTasks.Tasks
+	*tasks = rspGetTasks.Tasks
 	return resp, err
 }
 
@@ -101,20 +101,21 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms []models.Submission) (*resty.Response, error) {
+func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms *[]models.Submission) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
 	}
-	if taskName == "" {
-		return nil, fmt.Errorf("Task Name is required.")
-	}
 
-	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions")
+	endpoint := path.Join("contests", contestID, "submissions")
 	rspGetSubmissions := new(handlers.RspGetSubmissions)
-	resp, err := c.client.R().
+	req := c.client.R()
+	if taskName != "" {
+		req.SetQueryParam("task_name", taskName)
+	}
+	resp, err := req.
 		SetResult(&rspGetSubmissions).
 		Get(endpoint)
-	sbms = rspGetSubmissions.Submissions
+	*sbms = rspGetSubmissions.Submissions
 	return resp, err
 }
 
