@@ -34,6 +34,13 @@ func (c *AtcliClient) SetAuthToken(token string) {
 }
 
 func (c *AtcliClient) Login(userID string, password string, user *models.User) (*resty.Response, error) {
+	if userID == "" {
+		return nil, fmt.Errorf("User id is required.")
+	}
+	if password == "" {
+		return nil, fmt.Errorf("Password is required.")
+	}
+
 	endpoint := "login"
 	return c.client.R().
 		SetBody(models.User{ID: userID, Password: password}).
@@ -56,6 +63,10 @@ func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
 }
 
 func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+
 	endpoint := path.Join("contests", contestID)
 	return c.client.R().
 		SetResult(&contest).
@@ -63,6 +74,10 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 }
 
 func (c *AtcliClient) GetTasks(contestID string, tasks []models.Task) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+
 	endpoint := path.Join("contests", contestID, "tasks")
 	rspGetTasks := new(handlers.RspGetTasks)
 	resp, err := c.client.R().
@@ -72,15 +87,29 @@ func (c *AtcliClient) GetTasks(contestID string, tasks []models.Task) (*resty.Re
 	return resp, err
 }
 
-func (c *AtcliClient) GetTask(contestID string, taskID string, task *models.Task) (*resty.Response, error) {
-	endpoint := path.Join("contests", contestID, "tasks", taskID)
+func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Task) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+	if taskName == "" {
+		return nil, fmt.Errorf("Task Name is required.")
+	}
+
+	endpoint := path.Join("contests", contestID, "tasks", taskName)
 	return c.client.R().
 		SetResult(&task).
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetSubmissions(contestID string, taskID string, sbms []models.Submission) (*resty.Response, error) {
-	endpoint := path.Join("contests", contestID, "tasks", taskID, "submissions")
+func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms []models.Submission) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+	if taskName == "" {
+		return nil, fmt.Errorf("Task Name is required.")
+	}
+
+	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions")
 	rspGetSubmissions := new(handlers.RspGetSubmissions)
 	resp, err := c.client.R().
 		SetResult(&rspGetSubmissions).
@@ -89,15 +118,32 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskID string, sbms []mod
 	return resp, err
 }
 
-func (c *AtcliClient) GetSubmission(contestID string, taskID string, sbmId int, sbm *models.Submission) (*resty.Response, error) {
-	endpoint := path.Join("contests", contestID, "tasks", taskID, "submissions", string(sbmId))
+func (c *AtcliClient) GetSubmission(contestID string, taskName string, sbmID int, sbm *models.Submission) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+	if taskName == "" {
+		return nil, fmt.Errorf("Task Name is required.")
+	}
+	if sbmID == 0 {
+		return nil, fmt.Errorf("Submission id is required.")
+	}
+
+	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions", string(sbmID))
 	return c.client.R().
 		SetResult(&sbm).
 		Get(endpoint)
 }
 
-func (c *AtcliClient) PostSubmission(contestID string, taskID string, sbmId int, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
-	endpoint := path.Join("contests", contestID, "tasks", taskID, "submissions", string(sbmId))
+func (c *AtcliClient) PostSubmission(contestID string, taskName string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+	if taskName == "" {
+		return nil, fmt.Errorf("Task Name is required.")
+	}
+
+	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions")
 	return c.client.R().
 		SetResult(&sbm).
 		Post(endpoint)
