@@ -18,11 +18,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 
-	// . "github.com/gky360/atcli/constants"
-	// "github.com/gky360/atsrv/models"
+	"github.com/gky360/atcli/utils"
 	"github.com/spf13/cobra"
-	// "github.com/spf13/viper"
 )
 
 type BuildOptions struct {
@@ -44,6 +43,7 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := buildOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(buildOpt.ErrOut, err)
@@ -66,9 +66,33 @@ func init() {
 }
 
 func (opt *BuildOptions) Run(cmd *cobra.Command, args []string) (err error) {
-	// contestID := viper.GetString("contest.id")
-	// contestPath := viper.GetString("contest.path")
-	// taskName := args[0]
+	taskName := args[0]
+	if err = runBuild(taskName, opt.Out, opt.ErrOut); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func runBuild(taskName string, out, errOut io.Writer) error {
+	taskPath, err := utils.TaskPath(taskName)
+	if err != nil {
+		return err
+	}
+
+	if err := os.Chdir(taskPath); err != nil {
+		return err
+	}
+	execCmd := exec.Command(
+		"g++", "-std=gnu++1y", "-O2", "-o", "a.out", "Main.cpp",
+	)
+	execCmd.Stdout = out
+	execCmd.Stderr = errOut
+	execCmd.Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(errOut, "Build succeeded.")
 	return nil
 }
