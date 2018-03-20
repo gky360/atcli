@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"net/http"
-	"path"
+	"path/filepath"
 
 	"github.com/gky360/atsrv/handlers"
 	"github.com/gky360/atsrv/models"
@@ -67,7 +67,7 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID)
+	endpoint := filepath.Join("contests", contestID)
 	return c.client.R().
 		SetResult(&contest).
 		Get(endpoint)
@@ -78,7 +78,7 @@ func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Re
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "join")
+	endpoint := filepath.Join("contests", contestID, "join")
 	return c.client.R().
 		SetResult(&contest).
 		Post(endpoint)
@@ -89,7 +89,7 @@ func (c *AtcliClient) GetTasks(contestID string, tasks *[]models.Task) (*resty.R
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "tasks")
+	endpoint := filepath.Join("contests", contestID, "tasks")
 	rspGetTasks := new(handlers.RspGetTasks)
 	resp, err := c.client.R().
 		SetResult(&rspGetTasks).
@@ -106,7 +106,7 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 		return nil, fmt.Errorf("Task Name is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "tasks", taskName)
+	endpoint := filepath.Join("contests", contestID, "tasks", taskName)
 	return c.client.R().
 		SetResult(&task).
 		Get(endpoint)
@@ -117,7 +117,7 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms *[]
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "submissions")
+	endpoint := filepath.Join("contests", contestID, "submissions")
 	rspGetSubmissions := new(handlers.RspGetSubmissions)
 	req := c.client.R()
 	if taskName != "" {
@@ -138,7 +138,7 @@ func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Sub
 		return nil, fmt.Errorf("Submission id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
+	endpoint := filepath.Join("contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
 	return c.client.R().
 		SetResult(&sbm).
 		Get(endpoint)
@@ -149,7 +149,7 @@ func (c *AtcliClient) PostSubmission(contestID string, sbmSource string, sbm *mo
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "submissions")
+	endpoint := filepath.Join("contests", contestID, "submissions")
 	return c.client.R().
 		SetResult(&sbm).
 		Post(endpoint)

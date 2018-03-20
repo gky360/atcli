@@ -20,6 +20,7 @@ import (
 	"os"
 
 	. "github.com/gky360/atcli/constants"
+	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -86,6 +87,10 @@ func runClone(contestID string, out, errOut io.Writer) error {
 	}
 
 	fmt.Fprintln(out, tasksYaml)
+
+	if err = utils.CreateSourceFiles(tasks); err != nil {
+		return err
+	}
 
 	return nil
 }

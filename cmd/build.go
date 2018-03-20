@@ -19,10 +19,10 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
-	"github.com/gky360/atsrv/models"
+	// . "github.com/gky360/atcli/constants"
+	// "github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	// "github.com/spf13/viper"
 )
 
 type BuildOptions struct {
@@ -45,8 +45,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := buildCmd.Run(cmd, args); err != nil {
-			fmt.Fprintln(buildCmd.ErrOut, err)
+		if err := buildOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(buildOpt.ErrOut, err)
 		}
 	},
 }
@@ -66,9 +66,9 @@ func init() {
 }
 
 func (opt *BuildOptions) Run(cmd *cobra.Command, args []string) (err error) {
-	contestID := viper.GetString("contest.id")
-	contestPath := viper.GetString("contest.path")
-	taskName := args[0]
+	// contestID := viper.GetString("contest.id")
+	// contestPath := viper.GetString("contest.path")
+	// taskName := args[0]
 
 	return nil
 }
