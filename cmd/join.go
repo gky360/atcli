@@ -67,8 +67,16 @@ func init() {
 
 func (opt *JoinOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
+	if err = runJoin(contestID, opt.Out, opt.ErrOut); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func runJoin(contestID string, out, errOut io.Writer) error {
 	contest := new(models.Contest)
-	if _, err = Client.Join(contestID, contest); err != nil {
+	if _, err := Client.Join(contestID, contest); err != nil {
 		return err
 	}
 
@@ -77,7 +85,7 @@ func (opt *JoinOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	fmt.Fprintln(opt.Out, contestYaml)
+	fmt.Fprintln(out, contestYaml)
 
 	return nil
 }

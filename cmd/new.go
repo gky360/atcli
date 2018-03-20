@@ -19,24 +19,22 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
-	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-type CloneOptions struct {
+type NewOptions struct {
 	Out, ErrOut io.Writer
 }
 
-var cloneOpt = &CloneOptions{
+var newOpt = &NewOptions{
 	Out:    os.Stdout,
 	ErrOut: os.Stderr,
 }
 
-// cloneCmd represents the clone command
-var cloneCmd = &cobra.Command{
-	Use:   "clone",
+// newCmd represents the new command
+var newCmd = &cobra.Command{
+	Use:   "new",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -45,47 +43,34 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := cloneOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(cloneOpt.ErrOut, err)
+		if err := newOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(newOpt.ErrOut, err)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(cloneCmd)
+	rootCmd.AddCommand(newCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// cloneCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// newCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// cloneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
+func (opt *NewOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
+	if err = runJoin(contestID, opt.Out, opt.ErrOut); err != nil {
+		return err
+	}
 	if err = runClone(contestID, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func runClone(contestID string, out, errOut io.Writer) error {
-	var tasks []models.Task
-	if _, err := Client.GetTasks(contestID, &tasks); err != nil {
-		return err
-	}
-
-	tasksYaml, err := models.TasksToYaml(tasks)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintln(out, tasksYaml)
 
 	return nil
 }
