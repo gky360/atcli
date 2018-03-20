@@ -90,7 +90,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	tasksYaml, err := models.TasksToYaml(tasks)
+	tasksYaml, err := models.TasksToYamlShort(tasks)
 	if err != nil {
 		return err
 	}
