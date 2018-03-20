@@ -119,32 +119,26 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms *[]
 	return resp, err
 }
 
-func (c *AtcliClient) GetSubmission(contestID string, taskName string, sbmID int, sbm *models.Submission) (*resty.Response, error) {
+func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Submission) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
-	}
-	if taskName == "" {
-		return nil, fmt.Errorf("Task Name is required.")
 	}
 	if sbmID == 0 {
 		return nil, fmt.Errorf("Submission id is required.")
 	}
 
-	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions", string(sbmID))
+	endpoint := path.Join("contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
 	return c.client.R().
 		SetResult(&sbm).
 		Get(endpoint)
 }
 
-func (c *AtcliClient) PostSubmission(contestID string, taskName string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
+func (c *AtcliClient) PostSubmission(contestID string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
 	}
-	if taskName == "" {
-		return nil, fmt.Errorf("Task Name is required.")
-	}
 
-	endpoint := path.Join("contests", contestID, "tasks", taskName, "submissions")
+	endpoint := path.Join("contests", contestID, "submissions")
 	return c.client.R().
 		SetResult(&sbm).
 		Post(endpoint)

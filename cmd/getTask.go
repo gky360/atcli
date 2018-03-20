@@ -67,10 +67,9 @@ func init() {
 
 func (opt *GetTaskOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
-	var taskName string
 
 	if len(args) >= 1 {
-		taskName = args[0]
+		taskName := args[0]
 		task := new(models.Task)
 		if _, err = Client.GetTask(contestID, taskName, task); err != nil {
 			return err
