@@ -67,14 +67,14 @@ func init() {
 
 func (opt *BuildOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	taskName := args[0]
-	if err = runBuild(taskName, opt.Out, opt.ErrOut); err != nil {
+	if err = runBuild(taskName, true, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runBuild(taskName string, out, errOut io.Writer) error {
+func runBuild(taskName string, isForce bool, out, errOut io.Writer) error {
 	taskPath, err := utils.TaskPath(taskName)
 	if err != nil {
 		return err
@@ -83,6 +83,16 @@ func runBuild(taskName string, out, errOut io.Writer) error {
 	if err := os.Chdir(taskPath); err != nil {
 		return err
 	}
+	if _, err := os.Stat("a.out"); err == nil {
+		// file exists
+		if !isForce {
+			return nil
+		}
+	} else if !os.IsNotExist(err) {
+		// error
+		return err
+	}
+
 	execCmd := exec.Command(
 		"g++", "-std=gnu++1y", "-O2", "-o", "a.out", "Main.cpp",
 	)
