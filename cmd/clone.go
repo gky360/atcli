@@ -88,7 +88,7 @@ func runClone(contestID string, out, errOut io.Writer) error {
 
 	fmt.Fprintln(out, tasksYaml)
 
-	if err = utils.CreateSourceFiles(tasks); err != nil {
+	if err = utils.CreateFilesForTasks(tasks); err != nil {
 		return err
 	}
 

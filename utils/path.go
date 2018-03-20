@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -105,15 +106,6 @@ func CreateDirsForTask(task *models.Task) error {
 	return nil
 }
 
-func CreateDirsForTasks(tasks []models.Task) error {
-	for _, task := range tasks {
-		if err := CreateDirsForTask(&task); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func CreateSourceFile(task *models.Task) error {
 	if err := CreateDirsForTask(task); err != nil {
 		return err
@@ -134,9 +126,42 @@ func CreateSourceFile(task *models.Task) error {
 	return nil
 }
 
-func CreateSourceFiles(tasks []models.Task) error {
+func CreateSampleFiles(task *models.Task) error {
+	for _, sample := range task.Samples {
+		taskInputFilePath, err := TaskInputFilePath(task.Name, sample.Num)
+		if err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(taskInputFilePath, []byte(sample.Input), 0644); err != nil {
+			return err
+		}
+		fmt.Printf("Created file: %s\n", taskInputFilePath)
+
+		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sample.Num)
+		if err != nil {
+			return err
+		}
+		if err := ioutil.WriteFile(taskOutputFilePath, []byte(sample.Output), 0644); err != nil {
+			return err
+		}
+		fmt.Printf("Created file: %s\n", taskOutputFilePath)
+	}
+	return nil
+}
+
+func CreateFilesForTask(task *models.Task) error {
+	if err := CreateSourceFile(task); err != nil {
+		return err
+	}
+	if err := CreateSampleFiles(task); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateFilesForTasks(tasks []models.Task) error {
 	for _, task := range tasks {
-		if err := CreateSourceFile(&task); err != nil {
+		if err := CreateFilesForTask(&task); err != nil {
 			return err
 		}
 	}
