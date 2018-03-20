@@ -73,6 +73,17 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 		Get(endpoint)
 }
 
+func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Response, error) {
+	if contestID == "" {
+		return nil, fmt.Errorf("Contest id is required.")
+	}
+
+	endpoint := path.Join("contests", contestID, "join")
+	return c.client.R().
+		SetResult(&contest).
+		Post(endpoint)
+}
+
 func (c *AtcliClient) GetTasks(contestID string, tasks *[]models.Task) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
