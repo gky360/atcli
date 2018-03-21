@@ -21,9 +21,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 
+	"github.com/fatih/color"
 	"github.com/gky360/atcli/utils"
 	"github.com/spf13/cobra"
 )
@@ -81,16 +81,16 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	if err = runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
+	if err := runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	if sampleNum >= 0 {
-		if _, err := runWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+		if err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if err = runWithSamples(taskName, opt.Out, opt.ErrOut); err != nil {
+		if err := testWithSamples(taskName, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -110,34 +110,33 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
+func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byte, error) {
 	taskPath, err := utils.TaskPath(taskName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if err := os.Chdir(taskPath); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
-	taskInputFilePathRel, err := filepath.Rel(utils.RootPath(), taskInputFilePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if _, err := os.Stat(taskInputFilePath); err != nil {
 		if os.IsNotExist(err) {
-			return "", NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
+			return nil, NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
 		}
-		return "", err
+		return nil, err
 	}
-	fmt.Fprintf(out, "Sample file: %s\n", taskInputFilePathRel)
+	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
 
 	inBytes, err := ioutil.ReadFile(taskInputFilePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var stdoutBuf, stderrBuf bytes.Buffer
@@ -151,11 +150,11 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 	execCmdIn, _ := execCmd.StdinPipe()
 
 	if err = execCmd.Start(); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if _, err = execCmdIn.Write(inBytes); err != nil {
-		return "", err
+		return nil, err
 	}
 	go func() {
 		_, errStdout = io.Copy(outWriter, execCmdOut)
@@ -165,19 +164,47 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 	}()
 
 	if err = execCmd.Wait(); err != nil {
-		return "", err
+		return nil, err
 	}
 	if errStdout != nil || errStderr != nil {
-		return "", fmt.Errorf("Failed to capture stdout or stderr")
+		return nil, fmt.Errorf("Failed to capture stdout or stderr")
 	}
-	outStr := string(stdoutBuf.Bytes())
+	outStr := stdoutBuf.Bytes()
 
 	return outStr, nil
 }
 
-func runWithSamples(taskName string, out, errOut io.Writer) error {
+func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error {
+	res, err := runWithSample(taskName, sampleNum, out, errOut)
+	if err != nil {
+		return err
+	}
+
+	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleNum)
+	if err != nil {
+		return err
+	}
+	sampleOut, err := ioutil.ReadFile(taskOutputFilePath)
+	if err != nil {
+		return err
+	}
+
+	if bytes.Equal(res, sampleOut) {
+		successColor := color.New(color.FgGreen)
+		successColor.Fprintln(out, "Test: pass")
+	} else {
+		failureColor := color.New(color.FgRed)
+		failureColor.Fprintln(out, "Test: fail")
+		failureColor.Fprintln(out, "Correct output:")
+		fmt.Fprintln(out, string(sampleOut))
+	}
+
+	return nil
+}
+
+func testWithSamples(taskName string, out, errOut io.Writer) error {
 	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		_, err := runWithSample(taskName, sampleNum, out, errOut)
+		err := testWithSample(taskName, sampleNum, out, errOut)
 		switch err := err.(type) {
 		case nil:
 			// it's ok
