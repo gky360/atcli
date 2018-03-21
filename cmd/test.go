@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -31,7 +31,7 @@ import (
 type TestOptions struct {
 	Out, ErrOut io.Writer
 
-	isForce bool
+	isSkip bool
 }
 
 var testOpt = &TestOptions{
@@ -59,7 +59,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(testCmd)
-	testCmd.Flags().BoolVarP(&testOpt.isForce, "force", "f", false, "Force to build.")
+	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -81,12 +81,12 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		}
 	}
 
-	if err = runBuild(taskName, opt.isForce, opt.Out, opt.ErrOut); err != nil {
+	if err = runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	if sampleNum >= 0 {
-		if err = runWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+		if _, err := runWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
@@ -98,65 +98,93 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-var errSampleInputNotExist = errors.New("Sample input not found.")
+type SampleInputNotExistError struct {
+	msg string
+}
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) error {
+func (e SampleInputNotExistError) Error() string {
+	return e.msg
+}
+
+func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
+	return &SampleInputNotExistError{msg}
+}
+
+func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
 	taskPath, err := utils.TaskPath(taskName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if err := os.Chdir(taskPath); err != nil {
-		return err
+		return "", err
 	}
 
 	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
 	taskInputFilePathRel, err := filepath.Rel(utils.RootPath(), taskInputFilePath)
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Fprintf(out, "Sample file: %s\n", taskInputFilePathRel)
-
 	if err != nil {
-		return err
+		return "", err
 	}
 	if _, err := os.Stat(taskInputFilePath); err != nil {
 		if os.IsNotExist(err) {
-			return errSampleInputNotExist
+			return "", NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
 		}
-		return err
+		return "", err
 	}
+	fmt.Fprintf(out, "Sample file: %s\n", taskInputFilePathRel)
 
 	inBytes, err := ioutil.ReadFile(taskInputFilePath)
 	if err != nil {
-		return err
+		return "", err
 	}
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	var errStdout, errStderr error
+	outWriter := io.MultiWriter(out, &stdoutBuf)
+	errOutWriter := io.MultiWriter(errOut, &stderrBuf)
 
 	execCmd := exec.Command("./a.out")
-	execCmd.Stdout = out
-	execCmd.Stderr = errOut
-	execCmdIn, err := execCmd.StdinPipe()
-	if err != nil {
-		return err
-	}
+	execCmdOut, _ := execCmd.StdoutPipe()
+	execCmdErrOut, _ := execCmd.StderrPipe()
+	execCmdIn, _ := execCmd.StdinPipe()
 
 	if err = execCmd.Start(); err != nil {
-		return err
+		return "", err
 	}
+
 	if _, err = execCmdIn.Write(inBytes); err != nil {
-		return err
+		return "", err
 	}
+	go func() {
+		_, errStdout = io.Copy(outWriter, execCmdOut)
+	}()
+	go func() {
+		_, errStderr = io.Copy(errOutWriter, execCmdErrOut)
+	}()
+
 	if err = execCmd.Wait(); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	if errStdout != nil || errStderr != nil {
+		return "", fmt.Errorf("Failed to capture stdout or stderr")
+	}
+	outStr := string(stdoutBuf.Bytes())
+
+	return outStr, nil
 }
 
 func runWithSamples(taskName string, out, errOut io.Writer) error {
 	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		if err := runWithSample(taskName, sampleNum, out, errOut); err != nil {
-			if err != errSampleInputNotExist {
-				return err
-			}
+		_, err := runWithSample(taskName, sampleNum, out, errOut)
+		switch err := err.(type) {
+		case nil:
+			// it's ok
+		case *SampleInputNotExistError:
+			// it's ok
+		default:
+			return err
 		}
 	}
 
