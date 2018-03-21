@@ -18,15 +18,23 @@ func NewClient(host string) *AtcliClient {
 	c := new(AtcliClient)
 	c.client = resty.
 		SetHostURL(host).
-		OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
-			fmt.Printf("Status: %v\n", resp.Status())
-			fmt.Printf("Body:   %v\n", resp)
-			if resp.StatusCode() != http.StatusOK {
-				return fmt.Errorf("atsrv returned an error: %s\n%v", resp.Status(), resp)
-			}
-			return nil
-		})
+		OnBeforeRequest(onBeforeRequest).
+		OnAfterResponse(onAfterResponse)
 	return c
+}
+
+func onBeforeRequest(c *resty.Client, req *resty.Request) error {
+	fmt.Printf("API: %s %s\n", req.Method, req.URL)
+	return nil
+}
+
+func onAfterResponse(c *resty.Client, resp *resty.Response) error {
+	fmt.Printf("Status: %v\n", resp.Status())
+	fmt.Printf("Body:   %v\n", resp)
+	if resp.StatusCode() != http.StatusOK {
+		return fmt.Errorf("atsrv returned an error: %s\n%v", resp.Status(), resp)
+	}
+	return nil
 }
 
 func (c *AtcliClient) SetAuthToken(token string) {
@@ -41,7 +49,7 @@ func (c *AtcliClient) Login(userID string, password string, user *models.User) (
 		return nil, fmt.Errorf("Password is required.")
 	}
 
-	endpoint := "login"
+	endpoint := "/login"
 	return c.client.R().
 		SetBody(models.User{ID: userID, Password: password}).
 		SetResult(&user).
@@ -49,14 +57,14 @@ func (c *AtcliClient) Login(userID string, password string, user *models.User) (
 }
 
 func (c *AtcliClient) Logout(user *models.User) (*resty.Response, error) {
-	endpoint := "logout"
+	endpoint := "/logout"
 	return c.client.R().
 		SetResult(&user).
 		Post(endpoint)
 }
 
 func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
-	endpoint := "me"
+	endpoint := "/me"
 	return c.client.R().
 		SetResult(&user).
 		Get(endpoint)
@@ -67,7 +75,7 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID)
+	endpoint := filepath.Join("/contests", contestID)
 	return c.client.R().
 		SetResult(&contest).
 		Get(endpoint)
@@ -78,7 +86,7 @@ func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Re
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "join")
+	endpoint := filepath.Join("/contests", contestID, "join")
 	return c.client.R().
 		SetResult(&contest).
 		Post(endpoint)
@@ -89,7 +97,7 @@ func (c *AtcliClient) GetTasks(contestID string, tasks *[]models.Task) (*resty.R
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "tasks")
+	endpoint := filepath.Join("/contests", contestID, "tasks")
 	rspGetTasks := new(handlers.RspGetTasks)
 	resp, err := c.client.R().
 		SetResult(&rspGetTasks).
@@ -106,7 +114,7 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 		return nil, fmt.Errorf("Task Name is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "tasks", taskName)
+	endpoint := filepath.Join("/contests", contestID, "tasks", taskName)
 	return c.client.R().
 		SetResult(&task).
 		Get(endpoint)
@@ -117,7 +125,7 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskName string, sbms *[]
 		return nil, fmt.Errorf("Contest id is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "submissions")
+	endpoint := filepath.Join("/contests", contestID, "submissions")
 	rspGetSubmissions := new(handlers.RspGetSubmissions)
 	req := c.client.R()
 	if taskName != "" {
@@ -138,7 +146,7 @@ func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Sub
 		return nil, fmt.Errorf("Submission id is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
+	endpoint := filepath.Join("/contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
 	return c.client.R().
 		SetResult(&sbm).
 		Get(endpoint)
@@ -155,7 +163,7 @@ func (c *AtcliClient) PostSubmission(contestID string, taskName string, sbmSourc
 		return nil, fmt.Errorf("Submission source is required.")
 	}
 
-	endpoint := filepath.Join("contests", contestID, "submissions")
+	endpoint := filepath.Join("/contests", contestID, "submissions")
 	return c.client.R().
 		SetQueryParam("task_name", taskName).
 		SetBody(&models.Submission{Source: sbmSource}).
