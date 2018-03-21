@@ -144,13 +144,21 @@ func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Sub
 		Get(endpoint)
 }
 
-func (c *AtcliClient) PostSubmission(contestID string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
+func (c *AtcliClient) PostSubmission(contestID string, taskName string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf("Contest id is required.")
+	}
+	if taskName == "" {
+		return nil, fmt.Errorf("Task name is required.")
+	}
+	if sbmSource == "" {
+		return nil, fmt.Errorf("Submission source is required.")
 	}
 
 	endpoint := filepath.Join("contests", contestID, "submissions")
 	return c.client.R().
+		SetQueryParam("task_name", taskName).
+		SetBody(&models.Submission{Source: sbmSource}).
 		SetResult(&sbm).
 		Post(endpoint)
 }
