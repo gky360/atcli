@@ -76,7 +76,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 	// get tasks
 	var tasks []models.Task
-	if _, err = Client.GetTasks(contestID, &tasks); err != nil {
+	if _, err = Client.GetTasks(contestID, false, &tasks); err != nil {
 		return err
 	}
 
