@@ -82,8 +82,8 @@ func (opt *GetTaskOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		fmt.Fprintln(opt.Out, taskYaml)
 	} else {
-		var tasks []models.Task
-		if _, err = Client.GetTasks(contestID, false, &tasks); err != nil {
+		_, tasks, err := Client.GetTasks(contestID, false)
+		if err != nil {
 			return err
 		}
 

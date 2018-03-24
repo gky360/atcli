@@ -92,9 +92,9 @@ func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Re
 		Post(endpoint)
 }
 
-func (c *AtcliClient) GetTasks(contestID string, isFull bool, tasks *[]models.Task) (*resty.Response, error) {
+func (c *AtcliClient) GetTasks(contestID string, isFull bool) (*resty.Response, []*models.Task, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, nil, fmt.Errorf("Contest id is required.")
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "tasks")
@@ -106,8 +106,7 @@ func (c *AtcliClient) GetTasks(contestID string, isFull bool, tasks *[]models.Ta
 	resp, err := req.
 		SetResult(&rspGetTasks).
 		Get(endpoint)
-	*tasks = rspGetTasks.Tasks
-	return resp, err
+	return resp, rspGetTasks.Tasks, err
 }
 
 func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Task) (*resty.Response, error) {

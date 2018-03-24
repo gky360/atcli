@@ -159,9 +159,9 @@ func CreateFilesForTask(task *models.Task) error {
 	return nil
 }
 
-func CreateFilesForTasks(tasks []models.Task) error {
+func CreateFilesForTasks(tasks []*models.Task) error {
 	for _, task := range tasks {
-		if err := CreateFilesForTask(&task); err != nil {
+		if err := CreateFilesForTask(task); err != nil {
 			return err
 		}
 	}

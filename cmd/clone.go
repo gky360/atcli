@@ -76,8 +76,8 @@ func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runClone(contestID string, out, errOut io.Writer) error {
-	var tasks []models.Task
-	if _, err := Client.GetTasks(contestID, true, &tasks); err != nil {
+	_, tasks, err := Client.GetTasks(contestID, true)
+	if err != nil {
 		return err
 	}
 
