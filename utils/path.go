@@ -132,19 +132,21 @@ func CreateSampleFiles(task *models.Task) error {
 		if err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(taskInputFilePath, []byte(sample.Input), 0644); err != nil {
-			return err
-		}
-		fmt.Printf("Created file: %s\n", taskInputFilePath)
-
 		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sample.Num)
 		if err != nil {
 			return err
 		}
-		if err := ioutil.WriteFile(taskOutputFilePath, []byte(sample.Output), 0644); err != nil {
-			return err
+
+		for _, filePath := range []string{taskInputFilePath, taskOutputFilePath} {
+			if err := ioutil.WriteFile(filePath, []byte(sample.Input), 0644); err != nil {
+				return err
+			}
+			filePathRel, err := filepath.Rel(RootPath(), filePath)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Created file: %s\n", filePathRel)
 		}
-		fmt.Printf("Created file: %s\n", taskOutputFilePath)
 	}
 	return nil
 }
