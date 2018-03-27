@@ -81,8 +81,8 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// get submissions
-	var sbms []models.Submission
-	if _, err = Client.GetSubmissions(contestID, "", &sbms); err != nil {
+	_, sbms, err := Client.GetSubmissions(contestID, "")
+	if err != nil {
 		return err
 	}
 

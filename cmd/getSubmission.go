@@ -90,8 +90,8 @@ func (opt *GetSbmOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		fmt.Fprintln(opt.Out, sbmYaml)
 	} else {
-		var sbms []models.Submission
-		if _, err = Client.GetSubmissions(contestID, getSbmOpt.taskName, &sbms); err != nil {
+		_, sbms, err := Client.GetSubmissions(contestID, getSbmOpt.taskName)
+		if err != nil {
 			return err
 		}
 
