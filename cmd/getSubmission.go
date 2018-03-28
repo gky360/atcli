@@ -83,7 +83,7 @@ func (opt *GetSbmOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		sbmYaml, err := sbm.ToYamlShort()
+		sbmYaml, err := sbm.ToYaml()
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ func (opt *GetSbmOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		sbmsYaml, err := models.SubmissionsToYamlShort(sbms)
+		sbmsYaml, err := models.SubmissionsToYaml(sbms)
 		if err != nil {
 			return err
 		}

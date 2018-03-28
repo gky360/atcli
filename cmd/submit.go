@@ -87,5 +87,12 @@ func (opt *SubmitOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 	fmt.Fprintln(opt.Out, "Submit succeeded.")
 
+	sbmYaml, err := sbm.ToYaml()
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(opt.Out, sbmYaml)
+
 	return nil
 }

@@ -94,7 +94,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	sbmsYaml, err := models.SubmissionsToYamlShort(sbms)
+	sbmsYaml, err := models.SubmissionsToYaml(sbms)
 	if err != nil {
 		return err
 	}
