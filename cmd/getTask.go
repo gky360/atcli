@@ -75,19 +75,19 @@ func (opt *GetTaskOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		taskYaml, err := task.ToYamlShort()
+		taskYaml, err := task.ToYaml()
 		if err != nil {
 			return err
 		}
 
 		fmt.Fprintln(opt.Out, taskYaml)
 	} else {
-		var tasks []models.Task
-		if _, err = Client.GetTasks(contestID, &tasks); err != nil {
+		_, tasks, err := Client.GetTasks(contestID, false)
+		if err != nil {
 			return err
 		}
 
-		tasksYaml, err := models.TasksToYamlShort(tasks)
+		tasksYaml, err := models.TasksToYaml(tasks)
 		if err != nil {
 			return err
 		}

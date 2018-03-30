@@ -83,19 +83,19 @@ func (opt *GetSbmOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			return err
 		}
 
-		sbmYaml, err := sbm.ToYamlShort()
+		sbmYaml, err := sbm.ToYaml()
 		if err != nil {
 			return err
 		}
 
 		fmt.Fprintln(opt.Out, sbmYaml)
 	} else {
-		var sbms []models.Submission
-		if _, err = Client.GetSubmissions(contestID, getSbmOpt.taskName, &sbms); err != nil {
+		_, sbms, err := Client.GetSubmissions(contestID, getSbmOpt.taskName)
+		if err != nil {
 			return err
 		}
 
-		sbmsYaml, err := models.SubmissionsToYamlShort(sbms)
+		sbmsYaml, err := models.SubmissionsToYaml(sbms)
 		if err != nil {
 			return err
 		}

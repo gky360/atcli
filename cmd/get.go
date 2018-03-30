@@ -75,14 +75,14 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	// get tasks
-	var tasks []models.Task
-	if _, err = Client.GetTasks(contestID, &tasks); err != nil {
+	_, tasks, err := Client.GetTasks(contestID, false)
+	if err != nil {
 		return err
 	}
 
 	// get submissions
-	var sbms []models.Submission
-	if _, err = Client.GetSubmissions(contestID, "", &sbms); err != nil {
+	_, sbms, err := Client.GetSubmissions(contestID, "")
+	if err != nil {
 		return err
 	}
 
@@ -94,7 +94,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	sbmsYaml, err := models.SubmissionsToYamlShort(sbms)
+	sbmsYaml, err := models.SubmissionsToYaml(sbms)
 	if err != nil {
 		return err
 	}
