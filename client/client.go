@@ -41,28 +41,6 @@ func (c *AtcliClient) SetAuthToken(token string) {
 	c.client.SetAuthToken(token)
 }
 
-func (c *AtcliClient) Login(userID string, password string, user *models.User) (*resty.Response, error) {
-	if userID == "" {
-		return nil, fmt.Errorf("User id is required.")
-	}
-	if password == "" {
-		return nil, fmt.Errorf("Password is required.")
-	}
-
-	endpoint := "/login"
-	return c.client.R().
-		SetBody(models.User{ID: userID, Password: password}).
-		SetResult(&user).
-		Post(endpoint)
-}
-
-func (c *AtcliClient) Logout(user *models.User) (*resty.Response, error) {
-	endpoint := "/logout"
-	return c.client.R().
-		SetResult(&user).
-		Post(endpoint)
-}
-
 func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
 	endpoint := "/me"
 	return c.client.R().
