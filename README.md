@@ -1,2 +1,3 @@
 # atcli
-Command line interface for AtCoder.
+
+Command line interface for AtCoder (unofficial)
