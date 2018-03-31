@@ -153,9 +153,10 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byt
 		return nil, err
 	}
 
-	if _, err = execCmdIn.Write(inBytes); err != nil {
-		return nil, err
-	}
+	go func() {
+		defer execCmdIn.Close()
+		execCmdIn.Write(inBytes)
+	}()
 	go func() {
 		_, errStdout = io.Copy(outWriter, execCmdOut)
 	}()
