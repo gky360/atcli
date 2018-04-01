@@ -30,6 +30,7 @@ type GetSbmOptions struct {
 	Out, ErrOut io.Writer
 
 	taskName string
+	status   string
 }
 
 var getSbmOpt = &GetSbmOptions{
@@ -58,6 +59,7 @@ func init() {
 	getCmd.AddCommand(getSubmissionCmd)
 
 	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.taskName, "task", "t", "", "Task name")
+	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.status, "status", "s", "", "Submission status")
 
 	// Here you will define your flags and configuration settings.
 
@@ -90,7 +92,7 @@ func (opt *GetSbmOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		fmt.Fprintln(opt.Out, sbmYaml)
 	} else {
-		_, sbms, err := Client.GetSubmissions(contestID, getSbmOpt.taskName)
+		_, sbms, err := Client.GetSubmissions(contestID, getSbmOpt.taskName, getSbmOpt.status)
 		if err != nil {
 			return err
 		}

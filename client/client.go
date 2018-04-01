@@ -103,7 +103,7 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetSubmissions(contestID string, taskName string) (*resty.Response, []*models.Submission, error) {
+func (c *AtcliClient) GetSubmissions(contestID, taskName, status string) (*resty.Response, []*models.Submission, error) {
 	if contestID == "" {
 		return nil, nil, fmt.Errorf("Contest id is required.")
 	}
@@ -113,6 +113,9 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskName string) (*resty.
 	req := c.client.R()
 	if taskName != "" {
 		req.SetQueryParam("task_name", taskName)
+	}
+	if status != "" {
+		req.SetQueryParam("status", status)
 	}
 	resp, err := req.
 		SetResult(&rspGetSubmissions).
