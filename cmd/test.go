@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/gky360/atcli/utils"
@@ -110,33 +111,33 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byte, error) {
+func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
 	taskPath, err := utils.TaskPath(taskName)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if err := os.Chdir(taskPath); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if _, err := os.Stat(taskInputFilePath); err != nil {
 		if os.IsNotExist(err) {
-			return nil, NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
+			return "", NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
 		}
-		return nil, err
+		return "", err
 	}
 	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
 
 	inBytes, err := ioutil.ReadFile(taskInputFilePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	var stdoutBuf, stderrBuf bytes.Buffer
@@ -150,7 +151,7 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byt
 	execCmdIn, _ := execCmd.StdinPipe()
 
 	if err = execCmd.Start(); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	go func() {
@@ -165,12 +166,12 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byt
 	}()
 
 	if err = execCmd.Wait(); err != nil {
-		return nil, err
+		return "", err
 	}
 	if errStdout != nil || errStderr != nil {
-		return nil, fmt.Errorf("Failed to capture stdout or stderr")
+		return "", fmt.Errorf("Failed to capture stdout or stderr")
 	}
-	outStr := stdoutBuf.Bytes()
+	outStr := string(stdoutBuf.Bytes())
 
 	return outStr, nil
 }
@@ -185,19 +186,20 @@ func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error
 	if err != nil {
 		return err
 	}
-	sampleOut, err := ioutil.ReadFile(taskOutputFilePath)
+	sampleOutByte, err := ioutil.ReadFile(taskOutputFilePath)
 	if err != nil {
 		return err
 	}
+	sampleOut := string(sampleOutByte)
 
-	if bytes.Equal(res, sampleOut) {
+	if strings.Compare(strings.TrimSpace(res), strings.TrimSpace(sampleOut)) == 0 {
 		successColor := color.New(color.FgGreen)
 		successColor.Fprintln(out, "Test: pass")
 	} else {
 		failureColor := color.New(color.FgRed)
 		failureColor.Fprintln(out, "Test: fail")
 		failureColor.Fprintln(out, "Correct output:")
-		fmt.Fprintln(out, string(sampleOut))
+		fmt.Fprintln(out, sampleOut)
 	}
 
 	return nil
