@@ -35,14 +35,24 @@ var buildOpt = &BuildOptions{
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:   "build",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "build [task name]",
+	Short: "Build your source code for a task",
+	Long: `Build your source code for a task.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Example:
+    # Build your source code for task 'D'.
+	atcli build d
+
+"atcli" supports following languages and compiler commands.
+
+- C++14 (GCC 5.4.1)
+  "g++ -std=gnu++1y -O2 -o a.out Main.cpp"
+
+You must install the compiler for your language listed above
+and add the compiler to PATH in advance.
+
+Your source code file is supposed to be in
+"$ATCLI_ROOT/arc090/d/Main.cpp" , for example.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := buildOpt.Run(cmd, args); err != nil {
