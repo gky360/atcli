@@ -16,11 +16,39 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
-const Version = "v0.0.1"
+const (
+	Version = "v0.0.1"
+)
+
+var (
+	banner = fmt.Sprintf(`
+        __           ___
+       /\ \__       /\_ \    __
+   __  \ \ ,_\   ___\//\ \  /\_\ 
+ /'__'\ \ \ \/  /'___\\ \ \ \/\ \ 
+/\ \L\.\_\ \ \_/\ \__/ \_\ \_\ \ \ 
+\ \__/.\_\\ \__\ \____\/\____\\ \_\ 
+ \/__/\/_/ \/__/\/____/\/____/ \/_/
+%38s
+`, Version)
+)
+
+type VersionOptions struct {
+	Out, ErrOut io.Writer
+
+	surprise bool
+}
+
+var versionOpt = &VersionOptions{
+	Out:    os.Stdout,
+	ErrOut: os.Stderr,
+}
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
@@ -33,12 +61,16 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(Version)
+		if err := versionOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(versionOpt.ErrOut, err)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+	versionCmd.Flags().BoolVar(&versionOpt.surprise, "surprise", false, "")
+	versionCmd.Flags().MarkHidden("surprise")
 
 	// Here you will define your flags and configuration settings.
 
@@ -49,4 +81,13 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func (opt *VersionOptions) Run(cmd *cobra.Command, args []string) error {
+	if opt.surprise {
+		fmt.Println(banner)
+	} else {
+		fmt.Println(Version)
+	}
+	return nil
 }
