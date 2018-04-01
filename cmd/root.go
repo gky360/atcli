@@ -123,9 +123,6 @@ func initConfig() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("Using config file:", viper.ConfigFileUsed())
-	fmt.Println("Contest id:", viper.GetString("contest.id"))
-	fmt.Println()
 
 	// set access token to http client
 	host := viper.GetString("host")
