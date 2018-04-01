@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 
 	. "github.com/gky360/atcli/client"
+	"github.com/gky360/atcli/utils"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -79,16 +80,17 @@ func init() {
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port")
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv")
+	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
+
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files")
+	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
+
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder")
 	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "token for atsrv")
-	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
