@@ -15,12 +15,10 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 
@@ -109,71 +107,6 @@ func (e SampleInputNotExistError) Error() string {
 
 func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
-}
-
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
-	taskPath, err := utils.TaskPath(taskName)
-	if err != nil {
-		return "", err
-	}
-	if err := os.Chdir(taskPath); err != nil {
-		return "", err
-	}
-
-	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
-	if err != nil {
-		return "", err
-	}
-	if err != nil {
-		return "", err
-	}
-	if _, err := os.Stat(taskInputFilePath); err != nil {
-		if os.IsNotExist(err) {
-			return "", NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
-		}
-		return "", err
-	}
-	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
-
-	inBytes, err := ioutil.ReadFile(taskInputFilePath)
-	if err != nil {
-		return "", err
-	}
-
-	var stdoutBuf, stderrBuf bytes.Buffer
-	var errStdout, errStderr error
-	outWriter := io.MultiWriter(out, &stdoutBuf)
-	errOutWriter := io.MultiWriter(errOut, &stderrBuf)
-
-	execCmd := exec.Command("./a.out")
-	execCmdOut, _ := execCmd.StdoutPipe()
-	execCmdErrOut, _ := execCmd.StderrPipe()
-	execCmdIn, _ := execCmd.StdinPipe()
-
-	if err = execCmd.Start(); err != nil {
-		return "", err
-	}
-
-	go func() {
-		defer execCmdIn.Close()
-		execCmdIn.Write(inBytes)
-	}()
-	go func() {
-		_, errStdout = io.Copy(outWriter, execCmdOut)
-	}()
-	go func() {
-		_, errStderr = io.Copy(errOutWriter, execCmdErrOut)
-	}()
-
-	if err = execCmd.Wait(); err != nil {
-		return "", err
-	}
-	if errStdout != nil || errStderr != nil {
-		return "", fmt.Errorf("Failed to capture stdout or stderr")
-	}
-	outStr := string(stdoutBuf.Bytes())
-
-	return outStr, nil
 }
 
 func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error {
