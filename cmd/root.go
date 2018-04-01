@@ -31,6 +31,8 @@ type RootOptions struct {
 
 	cfgFile   string
 	contestID string
+	userID    string
+	token     string
 }
 
 var cfgFile string
@@ -73,6 +75,10 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atcli.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder")
+	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "token for atsrv")
+	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -116,8 +122,9 @@ func initConfig() {
 	fmt.Println()
 
 	// set access token to http client
-	userToken := viper.GetString("user.token")
-	if userToken != "" {
-		Client.SetAuthToken(userToken)
+	userID := viper.GetString("user.id")
+	authToken := viper.GetString("auth-token")
+	if userID != "" && authToken != "" {
+		Client.SetBasicAuth(userID, authToken)
 	}
 }

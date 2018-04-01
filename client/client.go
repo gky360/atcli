@@ -37,8 +37,8 @@ func onAfterResponse(c *resty.Client, resp *resty.Response) error {
 	return nil
 }
 
-func (c *AtcliClient) SetAuthToken(token string) {
-	c.client.SetAuthToken(token)
+func (c *AtcliClient) SetBasicAuth(username, token string) {
+	c.client.SetBasicAuth(username, token)
 }
 
 func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
