@@ -22,27 +22,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	Version = "v0.0.1"
-)
-
-var (
-	banner = fmt.Sprintf(`
-        __           ___
-       /\ \__       /\_ \    __
-   __  \ \ ,_\   ___\//\ \  /\_\ 
- /'__'\ \ \ \/  /'___\\ \ \ \/\ \ 
-/\ \L\.\_\ \ \_/\ \__/ \_\ \_\ \ \ 
-\ \__/.\_\\ \__\ \____\/\____\\ \_\ 
- \/__/\/_/ \/__/\/____/\/____/ \/_/
-%38s
-`, Version)
-)
-
 type VersionOptions struct {
 	Out, ErrOut io.Writer
-
-	surprise bool
 }
 
 var versionOpt = &VersionOptions{
@@ -69,8 +50,6 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-	versionCmd.Flags().BoolVar(&versionOpt.surprise, "surprise", false, "")
-	versionCmd.Flags().MarkHidden("surprise")
 
 	// Here you will define your flags and configuration settings.
 
@@ -84,10 +63,6 @@ func init() {
 }
 
 func (opt *VersionOptions) Run(cmd *cobra.Command, args []string) error {
-	if opt.surprise {
-		fmt.Println(banner)
-	} else {
-		fmt.Println(Version)
-	}
+	fmt.Println(Version)
 	return nil
 }

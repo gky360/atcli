@@ -38,6 +38,23 @@ type RootOptions struct {
 	token     string
 }
 
+const (
+	Version = "v0.0.1"
+)
+
+var (
+	banner = fmt.Sprintf(`
+        __           ___
+       /\ \__       /\_ \    __
+   __  \ \ ,_\   ___\//\ \  /\_\
+ /'__'\ \ \ \/  /'___\\ \ \ \/\ \
+/\ \L\.\_\ \ \_/\ \__/ \_\ \_\ \ \
+\ \__/.\_\\ \__\ \____\/\____\\ \_\
+ \/__/\/_/ \/__/\/____/\/____/ \/_/
+%38s
+`, Version)
+)
+
 var cfgFile string
 
 var rootOpt = &RootOptions{
@@ -48,16 +65,25 @@ var rootOpt = &RootOptions{
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "atcli",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "\"atcli\" is a command line interface for AtCoder (unofficial).",
+	Long: fmt.Sprintf("%s\n%s", banner,
+		`"atcli" is a command line interface for AtCoder (unofficial).
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+A basic flow of the usage of this command is as follows.
+
+    1. Start "atsrv" and get auth token.
+       (see https://github.com/gky360/atsrv for details)
+    2. Set user, contest and the auth token to the config file
+       (~/.atcli.yaml) using "atcli config" command.
+    3. Join contest using "atcli join" command.
+    4. Generate empty source code file and download sample cases
+       from AtCoder using "atcli clone" command.
+    5. Write your code to the generated source code file (Main.cpp).
+    6. Test your code with downloaded sample cases
+       using "atcli test" command.
+    7. Submit you code to AtCoder using "atcli submit" command.
+    8. Check your submission status
+       using "atcli get submission" command.`),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -72,12 +98,12 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	// global flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atcli.yaml)")
+
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "", "atsrv host")
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
+
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port")
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 
@@ -87,8 +113,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files")
 	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
+
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder")
 	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
 }
