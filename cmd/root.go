@@ -20,7 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -30,6 +30,8 @@ type RootOptions struct {
 	Out, ErrOut io.Writer
 
 	cfgFile   string
+	host      string
+	port      string
 	contestID string
 	userID    string
 	token     string
@@ -73,6 +75,10 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atcli.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "", "atsrv host")
+	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port")
+	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder")
@@ -122,8 +128,11 @@ func initConfig() {
 	fmt.Println()
 
 	// set access token to http client
+	host := viper.GetString("host")
+	port := viper.GetString("port")
 	userID := viper.GetString("user.id")
 	authToken := viper.GetString("auth-token")
+	Client = NewClient(host, port)
 	if userID != "" && authToken != "" {
 		Client.SetBasicAuth(userID, authToken)
 	}

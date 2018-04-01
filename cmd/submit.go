@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"

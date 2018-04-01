@@ -20,7 +20,7 @@ import (
 	"os"
 	"strconv"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

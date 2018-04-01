@@ -14,10 +14,12 @@ type AtcliClient struct {
 	client *resty.Client
 }
 
-func NewClient(host string) *AtcliClient {
+var Client *AtcliClient
+
+func NewClient(host, port string) *AtcliClient {
 	c := new(AtcliClient)
 	c.client = resty.
-		SetHostURL(host).
+		SetHostURL("http://" + host + ":" + port).
 		OnBeforeRequest(onBeforeRequest).
 		OnAfterResponse(onAfterResponse)
 	return c
