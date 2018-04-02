@@ -85,7 +85,7 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if sampleNum >= 0 {
-		if err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+		if _, err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
@@ -109,25 +109,27 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error {
+func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) (bool, error) {
 	res, err := runWithSample(taskName, sampleNum, out, errOut)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleNum)
 	if err != nil {
-		return err
+		return false, err
 	}
 	sampleOutByte, err := ioutil.ReadFile(taskOutputFilePath)
 	if err != nil {
-		return err
+		return false, err
 	}
 	sampleOut := string(sampleOutByte)
 
+	isPass := false
 	if strings.Compare(strings.TrimSpace(res), strings.TrimSpace(sampleOut)) == 0 {
 		successColor := color.New(color.FgGreen)
 		successColor.Fprintln(out, "Test: pass")
+		isPass = true
 	} else {
 		failureColor := color.New(color.FgRed)
 		failureColor.Fprintln(out, "Test: fail")
@@ -135,21 +137,40 @@ func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error
 		fmt.Fprintln(out, sampleOut)
 	}
 
-	return nil
+	return isPass, nil
 }
 
 func testWithSamples(taskName string, out, errOut io.Writer) error {
+	totalCount := 0
+	passCount := 0
 	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		err := testWithSample(taskName, sampleNum, out, errOut)
+		isPass, err := testWithSample(taskName, sampleNum, out, errOut)
 		switch err := err.(type) {
 		case nil:
-			// it's ok
+			totalCount++
+			if isPass {
+				passCount++
+			}
 		case *SampleInputNotExistError:
-			// it's ok
+			// task did not have sample with this sampleNum
 		default:
 			return err
 		}
 	}
+
+	var reportColor *color.Color
+	statusStr := ""
+	if passCount == totalCount {
+		// passed all sample cases
+		reportColor = color.New(color.FgBlack, color.BgHiGreen)
+		statusStr = "samples AC"
+	} else {
+		reportColor = color.New(color.FgBlack, color.BgHiRed)
+		statusStr = "samples WA"
+	}
+	fmt.Fprintln(out)
+	reportColor.Fprintf(out, "%s (pass: %d, fail: %d, total: %d)\n",
+		statusStr, passCount, totalCount-passCount, totalCount)
 
 	return nil
 }
