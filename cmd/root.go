@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
@@ -54,8 +55,6 @@ var (
 %38s
 `, Version)
 )
-
-var cfgFile string
 
 var rootOpt = &RootOptions{
 	Out:    os.Stdout,
@@ -99,32 +98,38 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// global flags
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.atcli.yaml)")
+	rootCmd.PersistentFlags().StringVar(&rootOpt.cfgFile, "config", "", "config file (aka. ATCLI_CONFIG) (default $HOME/.atcli.yaml)")
+	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "", "atsrv host")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "", "atsrv host (aka. ATCLI_HOST)")
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port (aka. ATCLI_PORT)")
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv (aka. ATCLI_AUTH_TOKEN)")
 	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files (aka. ATCLI_ROOT)")
 	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder (aka. ATCLI_CONTEST_ID)")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATCLI_USER_ID)")
 	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
+	viper.SetEnvPrefix("atcli")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
+	viper.AutomaticEnv() // read in environment variables that match
+
+	viper.SetConfigType("yaml")
+	if viper.GetString("config") != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(viper.GetString("config"))
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -136,16 +141,12 @@ func initConfig() {
 		// Search config in home directory with name ".atcli" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".atcli")
-		viper.SetConfigType("yaml")
-		cfgFile = filepath.Join(home, ".atcli.yaml")
+		cfgFile := filepath.Join(home, ".atcli.yaml")
 		if _, err = os.OpenFile(cfgFile, os.O_RDONLY|os.O_CREATE, 0644); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	}
-
-	viper.SetEnvPrefix("atcli")
-	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err != nil {
