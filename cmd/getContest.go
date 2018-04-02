@@ -37,13 +37,11 @@ var getContestOpt = &GetContestOptions{
 // getContestCmd represents the getContest command
 var getContestCmd = &cobra.Command{
 	Use:   "contest",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Get contest from \"atsrv\"",
+	Long: `Get contest from "atsrv".
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli get contest" command gets contest from "atsrv" and prints
+the data in yaml format.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := getContestOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(getContestOpt.ErrOut, err)

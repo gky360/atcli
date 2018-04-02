@@ -40,14 +40,17 @@ var getSbmOpt = &GetSbmOptions{
 
 // getSubmissionCmd represents the getSubmission command
 var getSubmissionCmd = &cobra.Command{
-	Use:   "submission",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "submission [submission id]",
+	Short: "Get submissions from \"atsrv\"",
+	Long: `Get submissions from "atsrv"
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli get submission" command gets submissions and prints the data
+in yaml format.
+
+When you specify submission id, one submission will be returned.
+When you specify task name flag or submission status flag, multiple
+submissions will be returned filtered by the flags.`,
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := getSbmOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(getSbmOpt.ErrOut, err)

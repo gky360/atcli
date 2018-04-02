@@ -44,7 +44,7 @@ var cloneCmd = &cobra.Command{
 Example:
     atcli clone
 
-"atcli clone" command will generate files into the following directory structure.
+"atcli clone" command generates files into the following directory structure.
 
 $ATCLI_ROOT/
 ├── arc090

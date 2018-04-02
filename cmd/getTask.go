@@ -36,14 +36,16 @@ var getTaskOpt = &GetTaskOptions{
 
 // getTaskCmd represents the getTask command
 var getTaskCmd = &cobra.Command{
-	Use:   "task",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "task [task name]",
+	Short: "Get tasks from \"atsrv\"",
+	Long: `Get tasks from "atsrv"
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli get task" command gets tasks from "atsrv" and prints the data
+in yaml format.
+
+When you specify task name flag, tasks filtered by the flags will be
+returned.`,
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := getTaskOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(getTaskOpt.ErrOut, err)
