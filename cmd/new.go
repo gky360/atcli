@@ -35,13 +35,16 @@ var newOpt = &NewOptions{
 // newCmd represents the new command
 var newCmd = &cobra.Command{
 	Use:   "new",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Join and clone a contest",
+	Long: `Join and clone a contest.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli new" command is a combination of "atcli join" and "atcli clone"
+command.
+
+If you already have joined the contest (i.e. the "Register" button is
+not displayed), this command will fail. You just need to run "atcli clone"
+command instead.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := newOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(newOpt.ErrOut, err)
