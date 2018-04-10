@@ -72,15 +72,15 @@ A basic flow of the usage of this command is as follows.
 
     1. Start "atsrv" and get auth token.
        (see https://github.com/gky360/atsrv for details)
-    2. Set user, contest and the auth token to the config file
+    2. Set a user id, contest id and the auth token to the config file
        (~/.atcli.yaml) using "atcli config" command.
-    3. Join contest using "atcli join" command.
+    3. Join a contest using "atcli join" command.
     4. Generate empty source code file and download sample cases
        from AtCoder using "atcli clone" command.
     5. Write your code to the generated source code file (Main.cpp).
     6. Test your code with downloaded sample cases
        using "atcli test" command.
-    7. Submit you code to AtCoder using "atcli submit" command.
+    7. Submit your code to AtCoder using "atcli submit" command.
     8. Check your submission status
        using "atcli get submission" command.`),
 }
