@@ -14,10 +14,12 @@ type AtcliClient struct {
 	client *resty.Client
 }
 
-func NewClient(host string) *AtcliClient {
+var Client *AtcliClient
+
+func NewClient(host, port string) *AtcliClient {
 	c := new(AtcliClient)
 	c.client = resty.
-		SetHostURL(host).
+		SetHostURL("http://" + host + ":" + port).
 		OnBeforeRequest(onBeforeRequest).
 		OnAfterResponse(onAfterResponse)
 	return c
@@ -37,30 +39,8 @@ func onAfterResponse(c *resty.Client, resp *resty.Response) error {
 	return nil
 }
 
-func (c *AtcliClient) SetAuthToken(token string) {
-	c.client.SetAuthToken(token)
-}
-
-func (c *AtcliClient) Login(userID string, password string, user *models.User) (*resty.Response, error) {
-	if userID == "" {
-		return nil, fmt.Errorf("User id is required.")
-	}
-	if password == "" {
-		return nil, fmt.Errorf("Password is required.")
-	}
-
-	endpoint := "/login"
-	return c.client.R().
-		SetBody(models.User{ID: userID, Password: password}).
-		SetResult(&user).
-		Post(endpoint)
-}
-
-func (c *AtcliClient) Logout(user *models.User) (*resty.Response, error) {
-	endpoint := "/logout"
-	return c.client.R().
-		SetResult(&user).
-		Post(endpoint)
+func (c *AtcliClient) SetBasicAuth(username, token string) {
+	c.client.SetBasicAuth(username, token)
 }
 
 func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
@@ -123,7 +103,7 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetSubmissions(contestID string, taskName string) (*resty.Response, []*models.Submission, error) {
+func (c *AtcliClient) GetSubmissions(contestID, taskName, status string) (*resty.Response, []*models.Submission, error) {
 	if contestID == "" {
 		return nil, nil, fmt.Errorf("Contest id is required.")
 	}
@@ -133,6 +113,9 @@ func (c *AtcliClient) GetSubmissions(contestID string, taskName string) (*resty.
 	req := c.client.R()
 	if taskName != "" {
 		req.SetQueryParam("task_name", taskName)
+	}
+	if status != "" {
+		req.SetQueryParam("status", status)
 	}
 	resp, err := req.
 		SetResult(&rspGetSubmissions).

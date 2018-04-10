@@ -20,60 +20,44 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-type NewOptions struct {
+type VersionOptions struct {
 	Out, ErrOut io.Writer
 }
 
-var newOpt = &NewOptions{
+var versionOpt = &VersionOptions{
 	Out:    os.Stdout,
 	ErrOut: os.Stderr,
 }
 
-// newCmd represents the new command
-var newCmd = &cobra.Command{
-	Use:   "new",
-	Short: "Join and clone a contest",
-	Long: `Join and clone a contest.
-
-"atcli new" command is a combination of "atcli join" and "atcli clone"
-command.
-
-If you already have joined the contest (i.e. the "Register" button is
-not displayed), this command will fail. You just need to run "atcli clone"
-command instead.`,
-	Args: cobra.NoArgs,
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print the version of atcli command",
+	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := newOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(newOpt.ErrOut, err)
+		if err := versionOpt.Run(cmd, args); err != nil {
+			fmt.Fprintln(versionOpt.ErrOut, err)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(newCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// newCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// versionCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// newCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *NewOptions) Run(cmd *cobra.Command, args []string) (err error) {
-	contestID := viper.GetString("contest.id")
-	if err = runJoin(contestID, opt.Out, opt.ErrOut); err != nil {
-		return err
-	}
-	if err = runClone(contestID, opt.Out, opt.ErrOut); err != nil {
-		return err
-	}
-
+func (opt *VersionOptions) Run(cmd *cobra.Command, args []string) error {
+	fmt.Println(Version)
 	return nil
 }

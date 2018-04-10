@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
@@ -38,14 +38,12 @@ var submitOpt = &SubmitOptions{
 
 // submitCmd represents the submit command
 var submitCmd = &cobra.Command{
-	Use:   "submit",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "submit [task name]",
+	Short: "Submit your source code to AtCoder",
+	Long: `Submit your source code to AtCoder.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli submit" command submits your source code for a specified task
+to AtCoder.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := submitOpt.Run(cmd, args); err != nil {

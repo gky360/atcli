@@ -36,13 +36,16 @@ var configOpt = &ConfigOptions{
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Get and set global options",
+	Long: `Get and set global options.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli config" command reads current config from environment variables
+and "~/.atcli.yaml", modify it according to the passed flags, save it
+to "~/.atcli.yaml", and then prints the new config.
+
+The priority of the config is
+command flags > env vars > config file .`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := configOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(configOpt.ErrOut, err)

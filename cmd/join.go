@@ -19,7 +19,7 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,13 +37,15 @@ var joinOpt = &JoinOptions{
 // joinCmd represents the join command
 var joinCmd = &cobra.Command{
 	Use:   "join",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Join a contest on AtCoder",
+	Long: `Join a contest on AtCoder.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli join" command will let you join a contest when a "Register" button
+is displayed on the contest page.
+
+If you already have joined the contest (i.e. the "Register" button is not
+displayed), this command will fail.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := joinOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(joinOpt.ErrOut, err)

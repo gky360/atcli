@@ -15,13 +15,12 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/gky360/atcli/utils"
@@ -41,14 +40,23 @@ var testOpt = &TestOptions{
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
-	Use:   "test",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "test [task name [sample number]]",
+	Short: "Build, run and test your source code",
+	Long: `Build, run and test your source code.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli test" command builds your source code, executes it with the
+downloaded sample inputs passed as stdin, prints the stdout and stderr,
+and check if your source code is correct by comparing the stdout and
+downloaded sample outputs.
+
+If you specify a sample number, this command only runs for the
+specified sample input and output.
+
+This command ignores leading and trailing spaces and line breaks when
+it compares the stdout and sample outputs.
+
+Note that this command only compares the outputs as strings, thus it
+can not give correct judges for tasks that accept multiple answers.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := testOpt.Run(cmd, args); err != nil {
@@ -86,7 +94,7 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if sampleNum >= 0 {
-		if err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+		if _, err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
@@ -110,110 +118,68 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) ([]byte, error) {
-	taskPath, err := utils.TaskPath(taskName)
-	if err != nil {
-		return nil, err
-	}
-	if err := os.Chdir(taskPath); err != nil {
-		return nil, err
-	}
-
-	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
-	if err != nil {
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-	if _, err := os.Stat(taskInputFilePath); err != nil {
-		if os.IsNotExist(err) {
-			return nil, NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
-		}
-		return nil, err
-	}
-	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
-
-	inBytes, err := ioutil.ReadFile(taskInputFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var stdoutBuf, stderrBuf bytes.Buffer
-	var errStdout, errStderr error
-	outWriter := io.MultiWriter(out, &stdoutBuf)
-	errOutWriter := io.MultiWriter(errOut, &stderrBuf)
-
-	execCmd := exec.Command("./a.out")
-	execCmdOut, _ := execCmd.StdoutPipe()
-	execCmdErrOut, _ := execCmd.StderrPipe()
-	execCmdIn, _ := execCmd.StdinPipe()
-
-	if err = execCmd.Start(); err != nil {
-		return nil, err
-	}
-
-	if _, err = execCmdIn.Write(inBytes); err != nil {
-		return nil, err
-	}
-	go func() {
-		_, errStdout = io.Copy(outWriter, execCmdOut)
-	}()
-	go func() {
-		_, errStderr = io.Copy(errOutWriter, execCmdErrOut)
-	}()
-
-	if err = execCmd.Wait(); err != nil {
-		return nil, err
-	}
-	if errStdout != nil || errStderr != nil {
-		return nil, fmt.Errorf("Failed to capture stdout or stderr")
-	}
-	outStr := stdoutBuf.Bytes()
-
-	return outStr, nil
-}
-
-func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) error {
+func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) (bool, error) {
 	res, err := runWithSample(taskName, sampleNum, out, errOut)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleNum)
 	if err != nil {
-		return err
+		return false, err
 	}
-	sampleOut, err := ioutil.ReadFile(taskOutputFilePath)
+	sampleOutByte, err := ioutil.ReadFile(taskOutputFilePath)
 	if err != nil {
-		return err
+		return false, err
 	}
+	sampleOut := string(sampleOutByte)
 
-	if bytes.Equal(res, sampleOut) {
+	isPass := false
+	if strings.Compare(strings.TrimSpace(res), strings.TrimSpace(sampleOut)) == 0 {
 		successColor := color.New(color.FgGreen)
 		successColor.Fprintln(out, "Test: pass")
+		isPass = true
 	} else {
 		failureColor := color.New(color.FgRed)
 		failureColor.Fprintln(out, "Test: fail")
 		failureColor.Fprintln(out, "Correct output:")
-		fmt.Fprintln(out, string(sampleOut))
+		fmt.Fprintln(out, sampleOut)
 	}
 
-	return nil
+	return isPass, nil
 }
 
 func testWithSamples(taskName string, out, errOut io.Writer) error {
+	totalCount := 0
+	passCount := 0
 	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		err := testWithSample(taskName, sampleNum, out, errOut)
+		isPass, err := testWithSample(taskName, sampleNum, out, errOut)
 		switch err := err.(type) {
 		case nil:
-			// it's ok
+			totalCount++
+			if isPass {
+				passCount++
+			}
 		case *SampleInputNotExistError:
-			// it's ok
+			// task did not have sample with this sampleNum
 		default:
 			return err
 		}
 	}
+
+	var reportColor *color.Color
+	statusStr := ""
+	if passCount == totalCount {
+		// passed all sample cases
+		reportColor = color.New(color.FgBlack, color.BgHiGreen)
+		statusStr = "samples AC"
+	} else {
+		reportColor = color.New(color.FgBlack, color.BgHiRed)
+		statusStr = "samples WA"
+	}
+	fmt.Fprintln(out)
+	reportColor.Fprintf(out, "%s (pass: %d, fail: %d, total: %d)\n",
+		statusStr, passCount, totalCount-passCount, totalCount)
 
 	return nil
 }

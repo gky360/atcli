@@ -19,7 +19,7 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gky360/atcli/constants"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
@@ -38,13 +38,39 @@ var cloneOpt = &CloneOptions{
 // cloneCmd represents the clone command
 var cloneCmd = &cobra.Command{
 	Use:   "clone",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Create source code files and download sample cases",
+	Long: `Create source code files and download sample cases.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Example:
+    atcli clone
+
+"atcli clone" command generates files into the following directory structure.
+
+$ATCLI_ROOT/
+├── arc090
+     ├── c
+     │   ├── Main.cpp
+     │   └── samples
+     │       ├── 01.in.txt
+     │       ├── 01.out.txt
+     │       ├── 02.in.txt
+     │       ├── 02.out.txt
+     │       ├── ...
+     ├── d
+     │   ├── Main.cpp
+     │   └── samples
+     │       ├── ...
+     ├── e
+     │   ├── Main.cpp
+     │   └── samples
+     │       ├── ...
+     └── f
+         ├── Main.cpp
+         └── samples
+             ├── ...
+
+To configure $ATCLI_ROOT, see "atcli config --help" .`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cloneOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(cloneOpt.ErrOut, err)
