@@ -40,14 +40,17 @@ var runOpt = &RunOptions{
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "run [task name [sample number]]",
+	Short: "Build and execute your source code for a task",
+	Long: `Build and execute your source code for a task.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli run" command builds your source code, executes it with the
+downloaded sample inputs passed as stdin, and prints the stdout and
+stderr.
+
+If you specify a sample number, this command only runs for the specified
+sample input.
+`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := runOpt.Run(cmd, args); err != nil {
@@ -58,7 +61,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
+	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
 
 	// Here you will define your flags and configuration settings.
 
