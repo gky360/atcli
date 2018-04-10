@@ -44,8 +44,8 @@ and "~/.atcli.yaml", modify it according to the passed flags, save it
 to "~/.atcli.yaml", and then prints the new config.
 
 The priority of the config is
-command flags > env vars > config file .
-`,
+command flags > env vars > config file .`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := configOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(configOpt.ErrOut, err)
