@@ -49,8 +49,7 @@ downloaded sample inputs passed as stdin, and prints the stdout and
 stderr.
 
 If you specify a sample number, this command only runs for the specified
-sample input.
-`,
+sample input.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := runOpt.Run(cmd, args); err != nil {

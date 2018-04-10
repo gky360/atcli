@@ -40,14 +40,23 @@ var testOpt = &TestOptions{
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
-	Use:   "test",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "test [task name [sample number]]",
+	Short: "Build, run and test your source code",
+	Long: `Build, run and test your source code.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+"atcli test" command builds your source code, executes it with the
+downloaded sample inputs passed as stdin, prints the stdout and stderr,
+and check if your source code is correct by comparing the stdout and
+downloaded sample outputs.
+
+If you specify a sample number, this command only runs for the
+specified sample input and output.
+
+This command ignores leading and trailing spaces and line breaks when
+it compares the stdout and sample outputs.
+
+Note that this command only compares the outputs as strings, thus it
+can not give correct judges for tasks that accept multiple answers.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := testOpt.Run(cmd, args); err != nil {
