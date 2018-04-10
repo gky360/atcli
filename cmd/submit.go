@@ -38,8 +38,9 @@ var submitOpt = &SubmitOptions{
 
 // submitCmd represents the submit command
 var submitCmd = &cobra.Command{
-	Use:   "submit [task name]",
-	Short: "Submit your source code to AtCoder",
+	Use:     "submit [task name]",
+	Aliases: []string{"sbm"},
+	Short:   "Submit your source code to AtCoder",
 	Long: `Submit your source code to AtCoder.
 
 "atcli submit" command submits your source code for a specified task

@@ -40,8 +40,9 @@ var getSbmOpt = &GetSbmOptions{
 
 // getSubmissionCmd represents the getSubmission command
 var getSubmissionCmd = &cobra.Command{
-	Use:   "submission [submission id]",
-	Short: "Get submissions from \"atsrv\"",
+	Use:     "submission [submission id]",
+	Aliases: []string{"sbm"},
+	Short:   "Get submissions from \"atsrv\"",
 	Long: `Get submissions from "atsrv"
 
 "atcli get submission" command gets submissions and prints the data
