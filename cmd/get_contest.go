@@ -36,8 +36,9 @@ var getContestOpt = &GetContestOptions{
 
 // getContestCmd represents the getContest command
 var getContestCmd = &cobra.Command{
-	Use:   "contest",
-	Short: "Get contest from \"atsrv\"",
+	Use:     "contest",
+	Aliases: []string{"cont"},
+	Short:   "Get contest from \"atsrv\"",
 	Long: `Get contest from "atsrv".
 
 "atcli get contest" command gets contest from "atsrv" and prints
