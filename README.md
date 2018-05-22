@@ -54,3 +54,10 @@ atcli get submission [2167890 | -t d]
 ```
 
 See `atcli --help` for more deatils.
+
+
+## Future work
+
+- fetching test cases used in judges on AtCoder
+- templating your source code
+- writing tests
