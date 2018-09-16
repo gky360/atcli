@@ -28,7 +28,6 @@ import (
 type RootOptions struct {
 	Out, ErrOut io.Writer
 
-	cfgFile   string
 	host      string
 	port      string
 	contestID string
@@ -69,8 +68,8 @@ A basic flow of the usage of this command is as follows.
 
     1. Start "atsrv" and get auth token.
        (see https://github.com/gky360/atsrv for details)
-    2. Set a user id, contest id and the auth token to the config file
-       (~/.atcli.yaml) using "atcli config" command.
+    2. Set a user id, contest id and the auth token to environment variables.
+       (see Flags section of "atcli --help" for details)
     3. Join a contest using "atcli join" command.
     4. Generate empty source code file and download sample cases
        from AtCoder using "atcli clone" command.
@@ -93,10 +92,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// global flags
-	// rootCmd.PersistentFlags().StringVar(&rootOpt.cfgFile, "config", "", "config file (aka. ATCLI_CONFIG) (default $HOME/.atcli.yaml)")
-	// viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "localhost", "atsrv host (aka. ATSRV_HOST)")
 	viper.BindEnv("host", "ATSRV_HOST")
