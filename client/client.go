@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"gopkg.in/resty.v1"
+
+	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/handlers"
 	"github.com/gky360/atsrv/models"
-	"gopkg.in/resty.v1"
 )
 
 type AtcliClient struct {
@@ -52,7 +54,7 @@ func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
 
 func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*resty.Response, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID)
@@ -63,7 +65,7 @@ func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*re
 
 func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Response, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "join")
@@ -74,7 +76,7 @@ func (c *AtcliClient) Join(contestID string, contest *models.Contest) (*resty.Re
 
 func (c *AtcliClient) GetTasks(contestID string, isFull bool) (*resty.Response, []*models.Task, error) {
 	if contestID == "" {
-		return nil, nil, fmt.Errorf("Contest id is required.")
+		return nil, nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "tasks")
@@ -91,10 +93,10 @@ func (c *AtcliClient) GetTasks(contestID string, isFull bool) (*resty.Response, 
 
 func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Task) (*resty.Response, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 	if taskName == "" {
-		return nil, fmt.Errorf("Task Name is required.")
+		return nil, fmt.Errorf(utils.MsgTaskNameRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "tasks", taskName)
@@ -105,7 +107,7 @@ func (c *AtcliClient) GetTask(contestID string, taskName string, task *models.Ta
 
 func (c *AtcliClient) GetSubmissions(contestID, taskName, status string) (*resty.Response, []*models.Submission, error) {
 	if contestID == "" {
-		return nil, nil, fmt.Errorf("Contest id is required.")
+		return nil, nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "submissions")
@@ -125,10 +127,10 @@ func (c *AtcliClient) GetSubmissions(contestID, taskName, status string) (*resty
 
 func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Submission) (*resty.Response, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 	if sbmID == 0 {
-		return nil, fmt.Errorf("Submission id is required.")
+		return nil, fmt.Errorf(utils.MsgSbmIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "submissions", fmt.Sprintf("%d", sbmID))
@@ -139,13 +141,13 @@ func (c *AtcliClient) GetSubmission(contestID string, sbmID int, sbm *models.Sub
 
 func (c *AtcliClient) PostSubmission(contestID string, taskName string, sbmSource string, sbm *models.Submission) (*resty.Response, error) {
 	if contestID == "" {
-		return nil, fmt.Errorf("Contest id is required.")
+		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 	if taskName == "" {
-		return nil, fmt.Errorf("Task name is required.")
+		return nil, fmt.Errorf(utils.MsgTaskNameRequired)
 	}
 	if sbmSource == "" {
-		return nil, fmt.Errorf("Submission source is required.")
+		return nil, fmt.Errorf(utils.MsgSbmSourceRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID, "submissions")

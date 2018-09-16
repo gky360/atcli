@@ -12,6 +12,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	MsgContestIDRequired = "Contest id is required. Try '--help' option for help."
+	MsgTaskNameRequired  = "Task name is required. Try '--help' option for help."
+	MsgSbmIDRequired     = "Submission id is required. Try '--help' option for help."
+	MsgSbmSourceRequired = "Submission source is required. Try '--help' option for help."
+)
+
 func DefaultRootPath() string {
 	home, err := homedir.Dir()
 	if err != nil {
@@ -32,14 +39,14 @@ func RootPath() string {
 func ContestPath() (string, error) {
 	contestID := viper.GetString("contest.id")
 	if contestID == "" {
-		return "", fmt.Errorf("Contest id is required.")
+		return "", fmt.Errorf(MsgContestIDRequired)
 	}
 	return filepath.Join(RootPath(), contestID), nil
 }
 
 func TaskPath(taskName string) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
 	contestPath, err := ContestPath()
 	if err != nil {
@@ -50,7 +57,7 @@ func TaskPath(taskName string) (string, error) {
 
 func TaskSourceFilePath(taskName string) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
 	taskPath, err := TaskPath(taskName)
 	if err != nil {
@@ -61,7 +68,7 @@ func TaskSourceFilePath(taskName string) (string, error) {
 
 func TaskSamplePath(taskName string) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
 	taskPath, err := TaskPath(taskName)
 	if err != nil {
@@ -72,7 +79,7 @@ func TaskSamplePath(taskName string) (string, error) {
 
 func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
 	taskSamplePath, err := TaskSamplePath(taskName)
 	if err != nil {
@@ -83,7 +90,7 @@ func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
 
 func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
 	taskSamplePath, err := TaskSamplePath(taskName)
 	if err != nil {
@@ -94,7 +101,7 @@ func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
 
 func CreateDirsForTask(task *models.Task) error {
 	if task.Name == "" {
-		return fmt.Errorf("Task name is required.")
+		return fmt.Errorf(MsgTaskNameRequired)
 	}
 	taskSamplePath, err := TaskSamplePath(task.Name)
 	if err != nil {

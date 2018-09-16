@@ -101,6 +101,10 @@ func init() {
 	viper.BindEnv("port", "ATSRV_PORT")
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATSRV_USER_ID)")
+	viper.BindEnv("user.id", "ATSRV_USER_ID")
+	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
+
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv (aka. ATSRV_AUTH_TOKEN)")
 	viper.BindEnv("auth-token", "ATSRV_AUTH_TOKEN")
 	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
@@ -112,10 +116,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder (aka. ATCLI_CONTEST_ID)")
 	viper.BindEnv("contest.id", "ATCLI_CONTEST_ID")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
-
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATCLI_USER_ID)")
-	viper.BindEnv("user.id", "ATCLI_USER_ID")
-	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
 }
 
 // initConfig reads in config file and ENV variables if set.
