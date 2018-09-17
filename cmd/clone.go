@@ -102,20 +102,29 @@ func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runClone(contestID string, out, errOut io.Writer) error {
+	contest := new(models.Contest)
+	_, err := Client.GetContest(contestID, contest)
+	if err != nil {
+		return err
+	}
+	contestYaml, err := contest.ToYaml()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, contestYaml)
+
 	_, tasks, err := Client.GetTasks(contestID, true)
 	if err != nil {
 		return err
 	}
-
 	tasksYaml, err := models.TasksToYaml(tasks)
 	if err != nil {
 		return err
 	}
-
 	fmt.Fprintln(out, tasksYaml)
 
 	fmt.Fprintf(out, "atcli root: %s\n", utils.RootPath())
-	if err = utils.CreateFilesForTasks(tasks); err != nil {
+	if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
 		return err
 	}
 

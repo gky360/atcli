@@ -116,6 +116,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder (aka. ATCLI_CONTEST_ID)")
 	viper.BindEnv("contest.id", "ATCLI_CONTEST_ID")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
+
+	viper.BindEnv("cppTemplatePath", "ATCLI_CPP_TEMPLATE_PATH")
 }
 
 // initConfig reads in config file and ENV variables if set.

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/gky360/atsrv/models"
 	homedir "github.com/mitchellh/go-homedir"
@@ -17,6 +18,13 @@ const (
 	MsgTaskNameRequired  = "Task name is required. Try '--help' option for help."
 	MsgSbmIDRequired     = "Submission id is required. Try '--help' option for help."
 	MsgSbmSourceRequired = "Submission source is required. Try '--help' option for help."
+)
+
+type (
+	TemplateData struct {
+		Contest *models.Contest
+		Task    *models.Task
+	}
 )
 
 func DefaultRootPath() string {
@@ -113,7 +121,7 @@ func CreateDirsForTask(task *models.Task) error {
 	return nil
 }
 
-func CreateSourceFile(task *models.Task) error {
+func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 	if err := CreateDirsForTask(task); err != nil {
 		return err
 	}
@@ -121,15 +129,45 @@ func CreateSourceFile(task *models.Task) error {
 	if err != nil {
 		return err
 	}
-	_, err = os.OpenFile(taskSourceFilePath, os.O_RDONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
 	taskSrouceFilePathRel, err := filepath.Rel(RootPath(), taskSourceFilePath)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Created file: %s\n", taskSrouceFilePathRel)
+
+	if _, err := os.Stat(taskSourceFilePath); err == nil {
+		// Already exists
+		fmt.Printf("Already exists: %s\n", taskSrouceFilePathRel)
+		return nil
+	}
+
+	cppTemplatePath := viper.GetString("cppTemplatePath")
+	if cppTemplatePath == "" {
+		// Create empty source file
+		_, err = os.OpenFile(taskSourceFilePath, os.O_RDONLY|os.O_CREATE, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Create source file from template
+		tmplData := TemplateData{
+			Contest: contest,
+			Task:    task,
+		}
+		t, err := template.ParseFiles(cppTemplatePath)
+		if err != nil {
+			return err
+		}
+		f, err := os.Create(taskSourceFilePath)
+		if err != nil {
+			return err
+		}
+		err = t.Execute(f, tmplData)
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("Created file  : %s\n", taskSrouceFilePathRel)
 	return nil
 }
 
@@ -156,14 +194,14 @@ func CreateSampleFiles(task *models.Task) error {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Created file: %s\n", filePathRel)
+			fmt.Printf("Created file  : %s\n", filePathRel)
 		}
 	}
 	return nil
 }
 
-func CreateFilesForTask(task *models.Task) error {
-	if err := CreateSourceFile(task); err != nil {
+func CreateFilesForTask(contest *models.Contest, task *models.Task) error {
+	if err := CreateSourceFile(contest, task); err != nil {
 		return err
 	}
 	if err := CreateSampleFiles(task); err != nil {
@@ -172,9 +210,9 @@ func CreateFilesForTask(task *models.Task) error {
 	return nil
 }
 
-func CreateFilesForTasks(tasks []*models.Task) error {
+func CreateFilesForTasks(contest *models.Contest, tasks []*models.Task) error {
 	for _, task := range tasks {
-		if err := CreateFilesForTask(task); err != nil {
+		if err := CreateFilesForTask(contest, task); err != nil {
 			return err
 		}
 	}
