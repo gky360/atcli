@@ -51,24 +51,32 @@ $ATCLI_ROOT/
 ├── arc090
      ├── c
      │   ├── Main.cpp
-     │   └── samples
-     │       ├── 01.in.txt
-     │       ├── 01.out.txt
-     │       ├── 02.in.txt
-     │       ├── 02.out.txt
-     │       ├── ...
+     │   ├── samples
+     │   │  ├── in
+     │   │  │  ├── 01.txt
+     │   │  │  ├── 02.txt
+     │   │  │  ├── ...
+     │   │  └── out
+     │   │      ├── 01.txt
+     │   │      ├── 02.txt
+     │   │      ├── ...
+     │   └── (testcases)
+     │       ├── in
+     │       │  ├── 01.txt
+     │       │  ├── 02.txt
+     │       │  ├── ...
+     │       └── out
+     │           ├── 01.txt
+     │           ├── 02.txt
+     │           ├── ...
      ├── d
      │   ├── Main.cpp
-     │   └── samples
-     │       ├── ...
+     │   ├── samples
+     │   └── (testcases)
      ├── e
-     │   ├── Main.cpp
-     │   └── samples
-     │       ├── ...
+     │   └── ...
      └── f
-         ├── Main.cpp
-         └── samples
-             ├── ...
+          └── ...
 `,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {

@@ -85,37 +85,60 @@ func TaskSamplePath(taskName string) (string, error) {
 	return filepath.Join(taskPath, "samples"), nil
 }
 
-func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
-	if taskName == "" {
-		return "", fmt.Errorf(MsgTaskNameRequired)
-	}
+func TaskSampleInPath(taskName string) (string, error) {
 	taskSamplePath, err := TaskSamplePath(taskName)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSamplePath, fmt.Sprintf("%02d.in.txt", sampleNum)), nil
+	return filepath.Join(taskSamplePath, "in"), nil
+}
+
+func TaskSampleOutPath(taskName string) (string, error) {
+	taskSamplePath, err := TaskSamplePath(taskName)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(taskSamplePath, "out"), nil
+}
+
+func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
+	if taskName == "" {
+		return "", fmt.Errorf(MsgTaskNameRequired)
+	}
+	taskSampleInPath, err := TaskSampleInPath(taskName)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(taskSampleInPath, fmt.Sprintf("%02d.txt", sampleNum)), nil
 }
 
 func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSamplePath, err := TaskSamplePath(taskName)
+	taskSampleOutPath, err := TaskSampleOutPath(taskName)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSamplePath, fmt.Sprintf("%02d.out.txt", sampleNum)), nil
+	return filepath.Join(taskSampleOutPath, fmt.Sprintf("%02d.txt", sampleNum)), nil
 }
 
 func CreateDirsForTask(task *models.Task) error {
 	if task.Name == "" {
 		return fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSamplePath, err := TaskSamplePath(task.Name)
+	taskSampleInPath, err := TaskSampleInPath(task.Name)
 	if err != nil {
 		return err
 	}
-	if err = os.MkdirAll(taskSamplePath, os.ModePerm); err != nil {
+	taskSampleOutPath, err := TaskSampleOutPath(task.Name)
+	if err != nil {
+		return err
+	}
+	if err = os.MkdirAll(taskSampleInPath, 0755); err != nil {
+		return err
+	}
+	if err = os.MkdirAll(taskSampleOutPath, 0755); err != nil {
 		return err
 	}
 	return nil
