@@ -118,7 +118,6 @@ func init() {
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 
 	viper.BindEnv("cppTemplatePath", "ATCLI_CPP_TEMPLATE_PATH")
-	viper.BindEnv("dropboxAccessToken", "ATCLI_DROPBOX_ACCESS_TOKEN")
 }
 
 // initConfig reads in config file and ENV variables if set.

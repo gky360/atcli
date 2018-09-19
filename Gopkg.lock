@@ -2,24 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/dropbox/dropbox-sdk-go-unofficial"
-  packages = [
-    "dropbox",
-    "dropbox/async",
-    "dropbox/common",
-    "dropbox/file_properties",
-    "dropbox/files",
-    "dropbox/seen_state",
-    "dropbox/sharing",
-    "dropbox/team_common",
-    "dropbox/team_policies",
-    "dropbox/users",
-    "dropbox/users_common"
-  ]
-  revision = "7afa861bfde5a348d765522b303b6fbd9d250155"
-  version = "v4.1.0"
-
-[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
@@ -42,12 +24,6 @@
   ]
   revision = "30abe1399bad593ddfd2656c9ae7f2e99da2f84a"
   version = "v0.0.1"
-
-[[projects]]
-  name = "github.com/golang/protobuf"
-  packages = ["proto"]
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/hashicorp/hcl"
@@ -200,21 +176,10 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "context",
-    "context/ctxhttp",
     "idna",
     "publicsuffix"
   ]
   revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
-
-[[projects]]
-  branch = "master"
-  name = "golang.org/x/oauth2"
-  packages = [
-    ".",
-    "internal"
-  ]
-  revision = "d2e6202438beef2727060aa7cabdd924d92ebfd9"
 
 [[projects]]
   branch = "master"
@@ -244,20 +209,6 @@
   version = "v0.3.0"
 
 [[projects]]
-  name = "google.golang.org/appengine"
-  packages = [
-    "internal",
-    "internal/base",
-    "internal/datastore",
-    "internal/log",
-    "internal/remote_api",
-    "internal/urlfetch",
-    "urlfetch"
-  ]
-  revision = "b1f26356af11148e710935ed1ac8a7f5702c7612"
-  version = "v1.1.0"
-
-[[projects]]
   name = "gopkg.in/resty.v1"
   packages = ["."]
   revision = "d4920dcf5b7689548a6db640278a9b35a5b48ec6"
@@ -272,6 +223,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5639aab9be29ca9c7b514563464097bde95df90c91b4f677df964399614c5c63"
+  inputs-digest = "8c0725b30d97adf1386dcdd35dc603aa042cacd56e09fc7d70f9c5e00638c228"
   solver-name = "gps-cdcl"
   solver-version = 1

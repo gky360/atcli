@@ -15,26 +15,20 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
-	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 type CloneOptions struct {
 	Out, ErrOut io.Writer
 }
-
-const atcoderDropboxRootURL = "https://www.dropbox.com/sh/arnpe0ef5wds8cv/AAAk_SECQ2Nc6SVGii3rHX6Fa"
 
 var cloneOpt = &CloneOptions{
 	Out:    os.Stdout,
@@ -74,7 +68,8 @@ $ATCLI_ROOT/
          ├── Main.cpp
          └── samples
              ├── ...
-`,
+
+To configure $ATCLI_ROOT, see "atcli config --help" .`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cloneOpt.Run(cmd, args); err != nil {
@@ -82,8 +77,6 @@ $ATCLI_ROOT/
 		}
 	},
 }
-
-var dbx files.Client
 
 func init() {
 	rootCmd.AddCommand(cloneCmd)
@@ -97,13 +90,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// cloneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	dbxToken := viper.GetString("dropboxAccessToken")
-	dbxConfig := dropbox.Config{
-		Token:    dbxToken,
-		LogLevel: dropbox.LogOff,
-	}
-	dbx = files.New(dbxConfig)
 }
 
 func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
@@ -141,69 +127,6 @@ func runClone(contestID string, out, errOut io.Writer) error {
 	if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
 		return err
 	}
-
-	if err := downloadTestcases(contest.ID); err != nil {
-		fmt.Fprintln(cloneOpt.ErrOut, err)
-		return err
-	}
-
-	return nil
-}
-
-func getContestDropboxURL(contestID string) error {
-	arg := files.NewListFolderArg("")
-	arg.SharedLink = files.NewSharedLink(atcoderDropboxRootURL)
-	argJSONStr, _ := json.Marshal(arg)
-	fmt.Fprintln(cloneOpt.Out, string(argJSONStr))
-
-	res, err := dbx.ListFolder(arg)
-	if err != nil {
-		return fmt.Errorf("Could not list folders in %s", atcoderDropboxRootURL)
-	}
-
-	normalizedContestID := normalizeContestDropboxFolderName(contestID)
-	for _, e := range res.Entries {
-		folderMeta, ok := e.(*files.FolderMetadata)
-		if !ok {
-			// not a folder
-			continue
-		}
-		folderName := folderMeta.Name
-		if normalizeContestDropboxFolderName(folderName) == normalizedContestID {
-		}
-	}
-
-	return nil
-}
-
-func downloadTestcases(contestID string) error {
-
-	// resJSONBytes, _ := json.Marshal(res)
-	// fmt.Fprintln(cloneOpt.Out, string(resJSONBytes))
-
-	// contestFolderUrl := contestFolderMetadata.Url
-	// fmt.Fprintf(cloneOpt.Out, "Downloading testcases from %s ...", contestFolderUrl)
-
-	// zipf, err := ioutil.TempFile("", contest.ID)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer zipf.Close()
-	//
-	// respHead, err := http.Head(contestFolderUrl)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer respHead.Body.Close()
-	//
-	// size, err := strconv.Atoi(respHead.Header.Get("Content-Length"))
-	// if err != nil{
-	// 	return err
-	// }
-	//
-	// done := make(chan int64)
-
-	// DownloadFile("/Users/inagaki/tmp/testcases", "https://www.slimjet.com/chrome/download-chrome.php?file=files%2F69.0.3497.92%2FChromeStandaloneSetup64.exe")
 
 	return nil
 }
