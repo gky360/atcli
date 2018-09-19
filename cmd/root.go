@@ -109,7 +109,7 @@ func init() {
 	viper.BindEnv("auth-token", "ATSRV_AUTH_TOKEN")
 	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files (aka. ATCLI_ROOT)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootDir(), "root directory where atcli create files (aka. ATCLI_ROOT)")
 	viper.BindEnv("root", "ATCLI_ROOT")
 	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
 

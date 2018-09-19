@@ -132,7 +132,7 @@ func runClone(contestID string, isFull bool, out, errOut io.Writer) error {
 	}
 	fmt.Fprintln(out, tasksYaml)
 
-	fmt.Fprintf(out, "atcli root: %s\n", utils.RootPath())
+	fmt.Fprintf(out, "atcli root: %s\n", utils.RootDir())
 	if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
 		return err
 	}

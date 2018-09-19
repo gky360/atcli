@@ -100,11 +100,11 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
-	taskPath, err := utils.TaskPath(taskName)
+	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return "", err
 	}
-	if err := os.Chdir(taskPath); err != nil {
+	if err := os.Chdir(taskDir); err != nil {
 		return "", err
 	}
 

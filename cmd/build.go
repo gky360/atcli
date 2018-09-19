@@ -85,12 +85,12 @@ func (opt *BuildOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runBuild(taskName string, isForce bool, out, errOut io.Writer) error {
-	taskPath, err := utils.TaskPath(taskName)
+	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return err
 	}
 
-	if err := os.Chdir(taskPath); err != nil {
+	if err := os.Chdir(taskDir); err != nil {
 		return err
 	}
 	if _, err := os.Stat("a.out"); err == nil {
