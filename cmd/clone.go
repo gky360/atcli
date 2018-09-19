@@ -27,7 +27,8 @@ import (
 )
 
 type CloneOptions struct {
-	Out, ErrOut io.Writer
+	Out, ErrOut   io.Writer
+	withTestcases bool
 }
 
 var cloneOpt = &CloneOptions{
@@ -69,7 +70,7 @@ $ATCLI_ROOT/
          └── samples
              ├── ...
 `,
-	Args: cobra.NoArgs,
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cloneOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(cloneOpt.ErrOut, err)
@@ -79,6 +80,7 @@ $ATCLI_ROOT/
 
 func init() {
 	rootCmd.AddCommand(cloneCmd)
+	cloneCmd.Flags().BoolVarP(&cloneOpt.withTestcases, "with-testcases", "", false, "download full testcases used in the contest.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -93,15 +95,16 @@ func init() {
 
 func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
-	if err = runClone(contestID, opt.Out, opt.ErrOut); err != nil {
+	if err = runClone(contestID, opt.withTestcases, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runClone(contestID string, out, errOut io.Writer) error {
+func runClone(contestID string, withTestcases bool, out, errOut io.Writer) error {
 	contest := new(models.Contest)
+	// TODO: add with_testcases_url=true option
 	_, err := Client.GetContest(contestID, contest)
 	if err != nil {
 		return err

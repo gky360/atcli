@@ -24,7 +24,8 @@ import (
 )
 
 type NewOptions struct {
-	Out, ErrOut io.Writer
+	Out, ErrOut   io.Writer
+	withTestcases bool
 }
 
 var newOpt = &NewOptions{
@@ -44,7 +45,7 @@ command.
 If you already have joined the contest (i.e. the "Register" button is
 not displayed), this command will fail. You just need to run "atcli clone"
 command instead.`,
-	Args: cobra.NoArgs,
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := newOpt.Run(cmd, args); err != nil {
 			fmt.Fprintln(newOpt.ErrOut, err)
@@ -54,6 +55,7 @@ command instead.`,
 
 func init() {
 	rootCmd.AddCommand(newCmd)
+	newCmd.Flags().BoolVarP(&newOpt.withTestcases, "with-testcases", "", false, "download full testcases used in the contest.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -71,7 +73,7 @@ func (opt *NewOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	if err = runJoin(contestID, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
-	if err = runClone(contestID, opt.Out, opt.ErrOut); err != nil {
+	if err = runClone(contestID, opt.withTestcases, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
