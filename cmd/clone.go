@@ -27,8 +27,8 @@ import (
 )
 
 type CloneOptions struct {
-	Out, ErrOut   io.Writer
-	withTestcases bool
+	Out, ErrOut io.Writer
+	isFull      bool
 }
 
 var cloneOpt = &CloneOptions{
@@ -88,7 +88,7 @@ $ATCLI_ROOT/
 
 func init() {
 	rootCmd.AddCommand(cloneCmd)
-	cloneCmd.Flags().BoolVarP(&cloneOpt.withTestcases, "with-testcases", "", false, "download full testcases used in the contest.")
+	cloneCmd.Flags().BoolVarP(&cloneOpt.isFull, "full", "", false, "download full testcases used in the contest.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -103,16 +103,16 @@ func init() {
 
 func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
-	if err = runClone(contestID, opt.withTestcases, opt.Out, opt.ErrOut); err != nil {
+	if err = runClone(contestID, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runClone(contestID string, withTestcases bool, out, errOut io.Writer) error {
+func runClone(contestID string, isFull bool, out, errOut io.Writer) error {
 	contest := new(models.Contest)
-	_, err := Client.GetContest(contestID, withTestcases, contest)
+	_, err := Client.GetContest(contestID, isFull, contest)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func runClone(contestID string, withTestcases bool, out, errOut io.Writer) error
 		return err
 	}
 
-	if withTestcases {
+	if isFull {
 		if err := utils.DownloadTestcases(contest, tasks); err != nil {
 			return err
 		}
