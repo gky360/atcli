@@ -68,8 +68,7 @@ $ATCLI_ROOT/
          ├── Main.cpp
          └── samples
              ├── ...
-
-To configure $ATCLI_ROOT, see "atcli config --help" .`,
+`,
 	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := cloneOpt.Run(cmd, args); err != nil {
