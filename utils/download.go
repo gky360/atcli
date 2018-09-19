@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	pb "gopkg.in/cheggaaa/pb.v2"
 
@@ -34,6 +35,22 @@ func DownloadTestcases(contest *models.Contest, tasks []*models.Task) error {
 	extractedDir := filepath.Join(tempdir, contest.ID)
 	if err = unzip(zipPath, extractedDir); err != nil {
 		return err
+	}
+
+	for _, task := range tasks {
+		src := filepath.Join(extractedDir, strings.ToLower(task.Name))
+		dest, err := TaskSampleDir(task.Name, true)
+		if err != nil {
+			return err
+		}
+		if err = os.Rename(src, dest); err != nil {
+			return err
+		}
+		destRel, err := filepath.Rel(RootDir(), dest)
+		if err != nil {
+			return err
+		}
+		fmt.Println("Created folder:", destRel)
 	}
 
 	return nil
