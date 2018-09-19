@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	pb "gopkg.in/cheggaaa/pb.v1"
+	pb "gopkg.in/cheggaaa/pb.v2"
 
 	"github.com/gky360/atsrv/models"
 )
@@ -24,11 +24,12 @@ func DownloadTestcases(contest *models.Contest, tasks []*models.Task) error {
 
 	filename := contest.ID + ".zip"
 	zipPath := filepath.Join(tempdir, filename)
-	if err := downloadFromUrl(contest.TestcasesURL, zipPath); err != nil {
+	if err = downloadFromUrl(contest.TestcasesURL, zipPath); err != nil {
 		return err
 	}
 
-	if err := unzip(zipPath, tempdir); err != nil {
+	extractedDir := filepath.Join(tempdir, contest.ID)
+	if err = unzip(zipPath, extractedDir); err != nil {
 		return err
 	}
 
@@ -55,31 +56,79 @@ func downloadFromUrl(url string, fpath string) error {
 	}
 	contentLength, _ := strconv.Atoi(resp.Header.Get("Content-Length"))
 
-	bar := pb.New(contentLength).SetUnits(pb.U_BYTES)
-	bar.ShowSpeed = true
-	bar.Start()
+	bar := pb.Full.Start(contentLength)
+	defer bar.Finish()
+
 	reader := bar.NewProxyReader(resp.Body)
 
 	_, err = io.Copy(out, reader)
 	if err != nil {
 		return err
 	}
-	bar.Finish()
 
 	fmt.Println("Downloaded", fpath, ".")
 	return nil
 }
 
 func unzip(src, dest string) error {
+	fmt.Println("Unziping", src)
+	fmt.Println("to", dest, "...")
+
+	os.MkdirAll(dest, 0755)
+
 	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
 	}
 	defer r.Close()
 
+	filesCnt := len(r.File)
+	bar := pb.Full.Start(filesCnt)
+
 	for _, f := range r.File {
-		fmt.Println(f.Name)
+		bar.Set("prefix", fnameToPrefix(f.Name)).
+			Write().
+			Increment()
+		if err = extractAndWriteFile(f, dest); err != nil {
+			return err
+		}
 	}
 
+	bar.Finish()
+	fmt.Println("Unzipped", src, ".")
+	return nil
+}
+
+func fnameToPrefix(fname string) string {
+	return fmt.Sprintf("%-20s", fname)[:20] + " "
+}
+
+func extractAndWriteFile(f *zip.File, dest string) error {
+	rc, err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	fpath := filepath.Join(dest, f.Name)
+
+	if f.FileInfo().IsDir() {
+		os.MkdirAll(fpath, f.Mode())
+	} else {
+		if err = os.MkdirAll(filepath.Dir(fpath), f.Mode()); err != nil {
+			return err
+		}
+
+		out, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+
+		_, err = io.Copy(out, rc)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
