@@ -105,7 +105,7 @@ func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 func runClone(contestID string, withTestcases bool, out, errOut io.Writer) error {
 	contest := new(models.Contest)
 	// TODO: add with_testcases_url=true option
-	_, err := Client.GetContest(contestID, contest)
+	_, err := Client.GetContest(contestID, withTestcases, contest)
 	if err != nil {
 		return err
 	}

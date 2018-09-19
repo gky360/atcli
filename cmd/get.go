@@ -68,7 +68,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	// get contest
 	contestID := viper.GetString("contest.id")
 	contest := new(models.Contest)
-	if _, err = Client.GetContest(contestID, contest); err != nil {
+	if _, err = Client.GetContest(contestID, false, contest); err != nil {
 		return err
 	}
 

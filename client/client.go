@@ -52,13 +52,17 @@ func (c *AtcliClient) Me(user *models.User) (*resty.Response, error) {
 		Get(endpoint)
 }
 
-func (c *AtcliClient) GetContest(contestID string, contest *models.Contest) (*resty.Response, error) {
+func (c *AtcliClient) GetContest(contestID string, withTestcasesURL bool, contest *models.Contest) (*resty.Response, error) {
 	if contestID == "" {
 		return nil, fmt.Errorf(utils.MsgContestIDRequired)
 	}
 
 	endpoint := filepath.Join("/contests", contestID)
-	return c.client.R().
+	req := c.client.R()
+	if withTestcasesURL {
+		req.SetQueryParam("with_testcases_url", "true")
+	}
+	return req.
 		SetResult(&contest).
 		Get(endpoint)
 }
