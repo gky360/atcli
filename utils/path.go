@@ -74,7 +74,7 @@ func TaskSourceFilePath(taskName string) (string, error) {
 	return filepath.Join(taskDir, "Main.cpp"), nil
 }
 
-func TaskSampleDir(taskName string) (string, error) {
+func TaskSampleDir(taskName string, isFull bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
@@ -82,19 +82,23 @@ func TaskSampleDir(taskName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskDir, "samples"), nil
+	dirname := "samples"
+	if isFull {
+		dirname = "testcases"
+	}
+	return filepath.Join(taskDir, dirname), nil
 }
 
-func TaskSampleInDir(taskName string) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName)
+func TaskSampleInDir(taskName string, isFull bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isFull)
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(taskSampleDir, "in"), nil
 }
 
-func TaskSampleOutDir(taskName string) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName)
+func TaskSampleOutDir(taskName string, isFull bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isFull)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +109,7 @@ func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleInDir, err := TaskSampleInDir(taskName)
+	taskSampleInDir, err := TaskSampleInDir(taskName, false)
 	if err != nil {
 		return "", err
 	}
@@ -116,7 +120,7 @@ func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(taskName)
+	taskSampleOutDir, err := TaskSampleOutDir(taskName, false)
 	if err != nil {
 		return "", err
 	}
@@ -127,11 +131,11 @@ func CreateDirsForTask(task *models.Task) error {
 	if task.Name == "" {
 		return fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleInDir, err := TaskSampleInDir(task.Name)
+	taskSampleInDir, err := TaskSampleInDir(task.Name, false)
 	if err != nil {
 		return err
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(task.Name)
+	taskSampleOutDir, err := TaskSampleOutDir(task.Name, false)
 	if err != nil {
 		return err
 	}
