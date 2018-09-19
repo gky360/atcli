@@ -19,7 +19,7 @@ import (
 	"io"
 	"os"
 
-	// . "github.com/gky360/atcli/client"
+	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/models"
 	"github.com/spf13/cobra"
@@ -103,37 +103,32 @@ func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runClone(contestID string, withTestcases bool, out, errOut io.Writer) error {
-	// contest := new(models.Contest)
-	// _, err := Client.GetContest(contestID, withTestcases, contest)
-	// if err != nil {
-	// 	return err
-	// }
-	// contestYaml, err := contest.ToYaml()
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Fprintln(out, contestYaml)
-	//
-	// _, tasks, err := Client.GetTasks(contestID, true)
-	// if err != nil {
-	// 	return err
-	// }
-	// tasksYaml, err := models.TasksToYaml(tasks)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Fprintln(out, tasksYaml)
-	//
-	// fmt.Fprintf(out, "atcli root: %s\n", utils.RootPath())
-	// if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
-	// 	return err
-	// }
-
-	contest := &models.Contest{
-		ID:           "arc097",
-		TestcasesURL: "https://www.dropbox.com/sh/arnpe0ef5wds8cv/AAAvaPbxbQLNgnc9q3WAkQFKa/ARC097?dl=1",
+	contest := new(models.Contest)
+	_, err := Client.GetContest(contestID, withTestcases, contest)
+	if err != nil {
+		return err
 	}
-	tasks := []*models.Task{}
+	contestYaml, err := contest.ToYaml()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, contestYaml)
+
+	_, tasks, err := Client.GetTasks(contestID, true)
+	if err != nil {
+		return err
+	}
+	tasksYaml, err := models.TasksToYaml(tasks)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, tasksYaml)
+
+	fmt.Fprintf(out, "atcli root: %s\n", utils.RootPath())
+	if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
+		return err
+	}
+
 	if withTestcases {
 		if err := utils.DownloadTestcases(contest, tasks); err != nil {
 			return err

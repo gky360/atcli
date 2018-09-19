@@ -16,11 +16,14 @@ import (
 )
 
 func DownloadTestcases(contest *models.Contest, tasks []*models.Task) error {
-	tempdir, err := ioutil.TempDir("", contest.ID+"_")
+	tempdir, err := ioutil.TempDir("", "atcli_"+contest.ID+"_")
 	if err != nil {
 		return err
 	}
-	// defer os.RemoveAll(tempdir)
+	defer func() {
+		os.RemoveAll(tempdir)
+		fmt.Println("Cleaned", tempdir, ".")
+	}()
 
 	filename := contest.ID + ".zip"
 	zipPath := filepath.Join(tempdir, filename)
