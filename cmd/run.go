@@ -21,10 +21,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strconv"
+
+	"github.com/spf13/cobra"
 
 	"github.com/gky360/atcli/utils"
-	"github.com/spf13/cobra"
 )
 
 type RunOptions struct {
@@ -40,7 +40,7 @@ var runOpt = &RunOptions{
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run [task name [sample number]]",
+	Use:   "run [task name [sample name]]",
 	Short: "Build and execute your source code for a task",
 	Long: `Build and execute your source code for a task.
 
@@ -48,7 +48,7 @@ var runCmd = &cobra.Command{
 downloaded sample inputs passed as stdin, and prints the stdout and
 stderr.
 
-If you specify a sample number, this command only runs for the specified
+If you specify a sample name, this command only runs for the specified
 sample input.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -75,23 +75,22 @@ func init() {
 
 func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	taskName := args[0]
-	sampleNum := -1
+	sampleName := ""
 	if len(args) >= 2 {
-		if sampleNum, err = strconv.Atoi(args[1]); err != nil {
-			return err
-		}
+		sampleName = args[1]
 	}
 
 	if err := runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
-	if sampleNum >= 0 {
-		if _, err := runWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+	const isFull = false // TODO: receive from option
+	if sampleName == "" {
+		if err := runWithSamples(taskName, isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if err := runWithSamples(taskName, opt.Out, opt.ErrOut); err != nil {
+		if _, err := runWithSample(taskName, sampleName, isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -99,7 +98,7 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
+func runWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (string, error) {
 	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return "", err
@@ -108,7 +107,7 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 		return "", err
 	}
 
-	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
+	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleName, isFull)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +120,7 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 		}
 		return "", err
 	}
-	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
+	fmt.Fprintf(out, "\n--- Task name: %s, Sample name: %s\n", taskName, sampleName)
 
 	inBytes, err := ioutil.ReadFile(taskInputFilePath)
 	if err != nil {
@@ -164,16 +163,16 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 	return outStr, nil
 }
 
-func runWithSamples(taskName string, out, errOut io.Writer) error {
-	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		_, err := runWithSample(taskName, sampleNum, out, errOut)
-		switch err := err.(type) {
-		case nil:
-			// it's ok
-		case *SampleInputNotExistError:
-			// it's ok
-		default:
-			return err
+func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
+	sampleNames, err := utils.GetSampleNames(taskName, isFull)
+	if err != nil {
+		return err
+	}
+
+	for _, sampleName := range sampleNames {
+		_, err := runWithSample(taskName, sampleName, isFull, out, errOut)
+		if err != nil {
+			return nil
 		}
 	}
 

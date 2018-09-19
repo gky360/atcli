@@ -105,26 +105,40 @@ func TaskSampleOutDir(taskName string, isFull bool) (string, error) {
 	return filepath.Join(taskSampleDir, "out"), nil
 }
 
-func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
+func TaskInputFilePath(taskName string, sampleName string, isFull bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleInDir, err := TaskSampleInDir(taskName, false)
+	taskSampleInDir, err := TaskSampleInDir(taskName, isFull)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleInDir, fmt.Sprintf("%02d.txt", sampleNum)), nil
+	return filepath.Join(taskSampleInDir, sampleName+".txt"), nil
 }
 
-func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
+func TaskOutputFilePath(taskName string, sampleName string, isFull bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(taskName, false)
+	taskSampleOutDir, err := TaskSampleOutDir(taskName, isFull)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleOutDir, fmt.Sprintf("%02d.txt", sampleNum)), nil
+	return filepath.Join(taskSampleOutDir, sampleName+".txt"), nil
+}
+
+func GetSampleNames(taskName string, isFull bool) ([]string, error) {
+	taskSampleInDir, err := TaskSampleInDir(taskName, isFull)
+	if err != nil {
+		return nil, err
+	}
+	pat := filepath.Join(taskSampleInDir, "*.txt")
+	g, err := filepath.Glob(pat)
+	sampleNames := make([]string, len(g))
+	for i, fpath := range g {
+		sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+	}
+	return sampleNames, nil
 }
 
 func CreateDirsForTask(task *models.Task) error {
@@ -200,11 +214,12 @@ func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 
 func CreateSampleFiles(task *models.Task) error {
 	for _, sample := range task.Samples {
-		taskInputFilePath, err := TaskInputFilePath(task.Name, sample.Num)
+		sampleName := fmt.Sprintf("%02d", sample.Num)
+		taskInputFilePath, err := TaskInputFilePath(task.Name, sampleName, false)
 		if err != nil {
 			return err
 		}
-		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sample.Num)
+		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sampleName, false)
 		if err != nil {
 			return err
 		}

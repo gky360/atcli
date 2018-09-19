@@ -41,7 +41,7 @@ atcli build d
 # Test your source code with sample cases downloaded by `atcli clone`
 atcli test d               # always build your source code
 atcli test d --skip-build  # skip build if possible
-atcli test d 1             # run with a specified sample input
+atcli test d 01            # run with a specified sample input
 
 # Submit your source code to AtCoder
 atcli submit d
