@@ -30,6 +30,7 @@ type TestOptions struct {
 	Out, ErrOut io.Writer
 
 	isSkip bool
+	isFull bool
 }
 
 var testOpt = &TestOptions{
@@ -67,6 +68,7 @@ can not give correct judges for tasks that accept multiple answers.`,
 func init() {
 	rootCmd.AddCommand(testCmd)
 	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
+	testCmd.Flags().BoolVarP(&testOpt.isFull, "full", "", false, "Execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -90,13 +92,12 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	const isFull = false // TODO: receive from option
 	if sampleName == "" {
-		if err := testWithSamples(taskName, isFull, opt.Out, opt.ErrOut); err != nil {
+		if err := testWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if _, err := testWithSample(taskName, sampleName, isFull, opt.Out, opt.ErrOut); err != nil {
+		if _, err := testWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}

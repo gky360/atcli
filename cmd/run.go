@@ -31,6 +31,7 @@ type RunOptions struct {
 	Out, ErrOut io.Writer
 
 	isSkip bool
+	isFull bool
 }
 
 var runOpt = &RunOptions{
@@ -60,7 +61,8 @@ sample input.`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
+	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
+	runCmd.Flags().BoolVarP(&runOpt.isFull, "full", "", false, "Execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -84,13 +86,12 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		return err
 	}
 
-	const isFull = false // TODO: receive from option
 	if sampleName == "" {
-		if err := runWithSamples(taskName, isFull, opt.Out, opt.ErrOut); err != nil {
+		if err := runWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if _, err := runWithSample(taskName, sampleName, isFull, opt.Out, opt.ErrOut); err != nil {
+		if _, err := runWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
