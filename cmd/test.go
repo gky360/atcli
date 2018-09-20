@@ -117,13 +117,13 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func testWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (bool, error) {
-	res, err := runWithSample(taskName, sampleName, isFull, out, errOut)
+func testWithSample(taskName string, sampleName string, isForTestcases bool, out, errOut io.Writer) (bool, error) {
+	res, err := runWithSample(taskName, sampleName, isForTestcases, out, errOut)
 	if err != nil {
 		return false, err
 	}
 
-	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleName, isFull)
+	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleName, isForTestcases)
 	if err != nil {
 		return false, err
 	}
@@ -152,18 +152,27 @@ func testWithSamples(taskName string, isFull bool, out, errOut io.Writer) error 
 	totalCount := 0
 	passCount := 0
 
-	sampleNames, err := utils.GetSampleNames(taskName, isFull)
-	if err != nil {
-		return err
+	opts := []bool{}
+	if isFull {
+		opts = []bool{false, true}
+	} else {
+		opts = []bool{false}
 	}
-	for _, sampleName := range sampleNames {
-		isPass, err := testWithSample(taskName, sampleName, isFull, out, errOut)
+
+	for _, isForTestcases := range opts {
+		sampleNames, err := utils.GetSampleNames(taskName, isForTestcases)
 		if err != nil {
 			return err
 		}
-		totalCount++
-		if isPass {
-			passCount++
+		for _, sampleName := range sampleNames {
+			isPass, err := testWithSample(taskName, sampleName, isForTestcases, out, errOut)
+			if err != nil {
+				return err
+			}
+			totalCount++
+			if isPass {
+				passCount++
+			}
 		}
 	}
 
