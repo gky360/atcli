@@ -43,39 +43,52 @@ var cloneCmd = &cobra.Command{
 	Long: `Create source code files and download sample cases.
 
 Example:
+	# Create source code files and download sample cases from AtCoder's task page.
     atcli clone
 
+If you specify your source code template file path to ATCLI_CPP_TEMPLATE_PATH,
+"atcli clone" command generates source code files from the specified
+template file.
+
+With --full option, "atcli clone --full" command downloads full testcases
+from AtCoder's dropbox folder https://bit.ly/2xywjgh . Those testcases are
+acually used in AtCoder's judge system. This option works only after AtCoder
+uploads the testcases of the contest.
+
 "atcli clone" command generates files into the following directory structure.
+Downloaded sample cases will be saved in "$ATCLI_ROOT/arc090/d/samples" ,
+and downloaded full testcases will be saved in "$ATCLI_ROOT/arc090/d/testcases" ,
+for example.
 
 $ATCLI_ROOT/
-├── arc090
-     ├── c
+├── arc090/
+     ├── c/
      │   ├── Main.cpp
-     │   ├── samples
-     │   │  ├── in
+     │   ├── samples/
+     │   │  ├── in/
      │   │  │  ├── 01.txt
      │   │  │  ├── 02.txt
      │   │  │  ├── ...
-     │   │  └── out
+     │   │  └── out/
      │   │      ├── 01.txt
      │   │      ├── 02.txt
      │   │      ├── ...
-     │   └── (testcases)
-     │       ├── in
+     │   └── (testcases/)
+     │       ├── in/
      │       │  ├── 01.txt
      │       │  ├── 02.txt
      │       │  ├── ...
-     │       └── out
+     │       └── out/
      │           ├── 01.txt
      │           ├── 02.txt
      │           ├── ...
-     ├── d
+     ├── d/
      │   ├── Main.cpp
-     │   ├── samples
-     │   └── (testcases)
-     ├── e
+     │   ├── samples/
+     │   └── (testcases/)
+     ├── e/
      │   └── ...
-     └── f
+     └── f/
           └── ...
 `,
 	Args: cobra.RangeArgs(0, 1),
@@ -88,7 +101,7 @@ $ATCLI_ROOT/
 
 func init() {
 	rootCmd.AddCommand(cloneCmd)
-	cloneCmd.Flags().BoolVarP(&cloneOpt.isFull, "full", "", false, "download full testcases used in the contest.")
+	cloneCmd.Flags().BoolVarP(&cloneOpt.isFull, "full", "", false, "download full testcases used in AtCoder's judge system.")
 
 	// Here you will define your flags and configuration settings.
 

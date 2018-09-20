@@ -56,7 +56,7 @@ This command ignores leading and trailing spaces and line breaks when
 it compares the stdout and sample outputs.
 
 Note that this command only compares the outputs as strings, thus it
-can not give correct judges for tasks that accept multiple answers.`,
+can not make correct judgements for tasks that accept multiple answers.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := testOpt.Run(cmd, args); err != nil {
@@ -67,8 +67,8 @@ can not give correct judges for tasks that accept multiple answers.`,
 
 func init() {
 	rootCmd.AddCommand(testCmd)
-	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
-	testCmd.Flags().BoolVarP(&testOpt.isFull, "full", "", false, "Execute with full testcases inputs.")
+	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
+	testCmd.Flags().BoolVarP(&testOpt.isFull, "full", "", false, "execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 

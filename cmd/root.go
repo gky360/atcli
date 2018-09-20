@@ -71,14 +71,12 @@ A basic flow of the usage of this command is as follows.
     2. Set a user id, contest id and the auth token to environment variables.
        (see Flags section of "atcli --help" for details)
     3. Join a contest using "atcli join" command.
-    4. Generate empty source code file and download sample cases
-       from AtCoder using "atcli clone" command.
-    5. Write your code to the generated source code file (Main.cpp).
-    6. Test your code with downloaded sample cases
-       using "atcli test" command.
+    4. Generate source code file and download sample cases from AtCoder
+	   using "atcli clone" command.
+    5. Write your code to the generated source code file (e.g. Main.cpp).
+    6. Test your code with downloaded sample cases using "atcli test" command.
     7. Submit your code to AtCoder using "atcli submit" command.
-    8. Check your submission status
-       using "atcli get submission" command.`),
+    8. Check your submission status using "atcli get submission" command.`),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

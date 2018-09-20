@@ -43,8 +43,7 @@ var getTaskCmd = &cobra.Command{
 "atcli get task" command gets tasks from "atsrv" and prints the data
 in yaml format.
 
-When you specify task name flag, tasks filtered by the flags will be
-returned.`,
+When you specify task name, one task will be returned.`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := getTaskOpt.Run(cmd, args); err != nil {

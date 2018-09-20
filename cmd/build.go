@@ -41,7 +41,7 @@ var buildCmd = &cobra.Command{
 
 Example:
     # Build your source code for task 'D'.
-	atcli build d
+    atcli build d
 
 "atcli" supports following languages and compiler commands.
 

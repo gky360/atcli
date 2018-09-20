@@ -61,8 +61,8 @@ sample input.`,
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
-	runCmd.Flags().BoolVarP(&runOpt.isFull, "full", "", false, "Execute with full testcases inputs.")
+	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
+	runCmd.Flags().BoolVarP(&runOpt.isFull, "full", "", false, "execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 
