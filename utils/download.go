@@ -43,13 +43,20 @@ func DownloadTestcases(contest *models.Contest, tasks []*models.Task) error {
 		if err != nil {
 			return err
 		}
-		if err = os.Rename(src, dest); err != nil {
-			return err
-		}
 		destRel, err := filepath.Rel(RootDir(), dest)
 		if err != nil {
 			return err
 		}
+		if _, err := os.Stat(dest); err == nil {
+			// Already exists
+			fmt.Println("Already exists:", destRel)
+			continue
+		}
+
+		if err = os.Rename(src, dest); err != nil {
+			return err
+		}
+
 		fmt.Println("Created folder:", destRel)
 	}
 
