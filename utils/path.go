@@ -74,7 +74,7 @@ func TaskSourceFilePath(taskName string) (string, error) {
 	return filepath.Join(taskDir, "Main.cpp"), nil
 }
 
-func TaskSampleDir(taskName string, isFull bool) (string, error) {
+func TaskSampleDir(taskName string, isForTestcases bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
@@ -83,52 +83,52 @@ func TaskSampleDir(taskName string, isFull bool) (string, error) {
 		return "", err
 	}
 	dirname := "samples"
-	if isFull {
+	if isForTestcases {
 		dirname = "testcases"
 	}
 	return filepath.Join(taskDir, dirname), nil
 }
 
-func TaskSampleInDir(taskName string, isFull bool) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName, isFull)
+func TaskSampleInDir(taskName string, isForTestcases bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(taskSampleDir, "in"), nil
 }
 
-func TaskSampleOutDir(taskName string, isFull bool) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName, isFull)
+func TaskSampleOutDir(taskName string, isForTestcases bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(taskSampleDir, "out"), nil
 }
 
-func TaskInputFilePath(taskName string, sampleName string, isFull bool) (string, error) {
+func TaskInputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleInDir, err := TaskSampleInDir(taskName, isFull)
+	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(taskSampleInDir, sampleName+".txt"), nil
 }
 
-func TaskOutputFilePath(taskName string, sampleName string, isFull bool) (string, error) {
+func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(taskName, isFull)
+	taskSampleOutDir, err := TaskSampleOutDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(taskSampleOutDir, sampleName+".txt"), nil
 }
 
-func GetSampleNames(taskName string, isFull bool) ([]string, error) {
-	taskSampleInDir, err := TaskSampleInDir(taskName, isFull)
+func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
+	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
 	if err != nil {
 		return nil, err
 	}
