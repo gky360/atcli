@@ -99,7 +99,7 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func runWithSample(taskName string, sampleName string, isForTestcases bool, out, errOut io.Writer) (string, error) {
+func runWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (string, error) {
 	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return "", err
@@ -108,7 +108,7 @@ func runWithSample(taskName string, sampleName string, isForTestcases bool, out,
 		return "", err
 	}
 
-	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleName, isForTestcases)
+	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleName, isFull)
 	if err != nil {
 		return "", err
 	}
@@ -165,23 +165,15 @@ func runWithSample(taskName string, sampleName string, isForTestcases bool, out,
 }
 
 func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
-	opts := []bool{}
-	if isFull {
-		opts = []bool{false, true}
-	} else {
-		opts = []bool{false}
+	sampleNames, err := utils.GetSampleNames(taskName, isFull)
+	if err != nil {
+		return err
 	}
 
-	for _, isForTestcases := range opts {
-		sampleNames, err := utils.GetSampleNames(taskName, isForTestcases)
+	for _, sampleName := range sampleNames {
+		_, err := runWithSample(taskName, sampleName, isFull, out, errOut)
 		if err != nil {
-			return err
-		}
-		for _, sampleName := range sampleNames {
-			_, err := runWithSample(taskName, sampleName, isForTestcases, out, errOut)
-			if err != nil {
-				return nil
-			}
+			return nil
 		}
 	}
 
