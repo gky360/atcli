@@ -132,6 +132,10 @@ func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if _, err = os.Stat(taskSampleInDir); err != nil {
+		return nil, err
+	}
+
 	pat := filepath.Join(taskSampleInDir, "*.txt")
 	g, err := filepath.Glob(pat)
 	sampleNames := make([]string, len(g))
