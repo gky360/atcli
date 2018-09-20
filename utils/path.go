@@ -218,7 +218,7 @@ func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 
 func CreateSampleFiles(task *models.Task) error {
 	for _, sample := range task.Samples {
-		sampleName := fmt.Sprintf("%02d", sample.Num)
+		sampleName := fmt.Sprintf("sample%02d", sample.Num)
 		taskInputFilePath, err := TaskInputFilePath(task.Name, sampleName, false)
 		if err != nil {
 			return err
