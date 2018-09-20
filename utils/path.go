@@ -170,25 +170,25 @@ func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 	if err := CreateDirsForTask(task); err != nil {
 		return err
 	}
-	taskSourceFileDir, err := TaskSourceFilePath(task.Name)
+	taskSourceFilePath, err := TaskSourceFilePath(task.Name)
 	if err != nil {
 		return err
 	}
-	taskSrouceFileDirRel, err := filepath.Rel(RootDir(), taskSourceFileDir)
+	taskSrouceFilePathRel, err := filepath.Rel(RootDir(), taskSourceFilePath)
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(taskSourceFileDir); err == nil {
+	if _, err := os.Stat(taskSourceFilePath); err == nil {
 		// Already exists
-		fmt.Printf("Already exists: %s\n", taskSrouceFileDirRel)
+		fmt.Printf("Already exists: %s\n", taskSrouceFilePathRel)
 		return nil
 	}
 
-	cppTemplateDir := viper.GetString("cppTemplateDir")
-	if cppTemplateDir == "" {
+	cppTemplatePath := viper.GetString("cppTemplatePath")
+	if cppTemplatePath == "" {
 		// Create empty source file
-		_, err = os.OpenFile(taskSourceFileDir, os.O_RDONLY|os.O_CREATE, 0644)
+		_, err = os.OpenFile(taskSourceFilePath, os.O_RDONLY|os.O_CREATE, 0644)
 		if err != nil {
 			return err
 		}
@@ -198,11 +198,11 @@ func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 			Contest: contest,
 			Task:    task,
 		}
-		t, err := template.ParseFiles(cppTemplateDir)
+		t, err := template.ParseFiles(cppTemplatePath)
 		if err != nil {
 			return err
 		}
-		f, err := os.Create(taskSourceFileDir)
+		f, err := os.Create(taskSourceFilePath)
 		if err != nil {
 			return err
 		}
@@ -212,7 +212,7 @@ func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 		}
 	}
 
-	fmt.Printf("Created file  : %s\n", taskSrouceFileDirRel)
+	fmt.Printf("Created file  : %s\n", taskSrouceFilePathRel)
 	return nil
 }
 
