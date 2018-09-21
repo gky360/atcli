@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -123,45 +122,27 @@ func runWithSample(taskName string, sampleName string, isFull bool, out, errOut 
 	}
 	fmt.Fprintf(out, "\n--- Task name: %s, Sample name: %s\n", taskName, sampleName)
 
-	inBytes, err := ioutil.ReadFile(taskInputFilePath)
+	tIn, err := os.Open(taskInputFilePath)
 	if err != nil {
 		return "", err
 	}
 
-	var stdoutBuf, stderrBuf bytes.Buffer
-	var errStdout, errStderr error
-	outWriter := io.MultiWriter(out, &stdoutBuf)
-	errOutWriter := io.MultiWriter(errOut, &stderrBuf)
-
+	var stdoutBuf bytes.Buffer
 	execCmd := exec.Command("./a.out")
-	execCmdOut, _ := execCmd.StdoutPipe()
-	execCmdErrOut, _ := execCmd.StderrPipe()
-	execCmdIn, _ := execCmd.StdinPipe()
+	execCmd.Stdin = tIn
+	execCmd.Stdout = io.MultiWriter(out, &stdoutBuf)
+	execCmd.Stderr = errOut
 
 	if err = execCmd.Start(); err != nil {
 		return "", err
 	}
-
-	go func() {
-		defer execCmdIn.Close()
-		execCmdIn.Write(inBytes)
-	}()
-	go func() {
-		_, errStdout = io.Copy(outWriter, execCmdOut)
-	}()
-	go func() {
-		_, errStderr = io.Copy(errOutWriter, execCmdErrOut)
-	}()
-
 	if err = execCmd.Wait(); err != nil {
 		return "", err
 	}
-	if errStdout != nil || errStderr != nil {
-		return "", fmt.Errorf("Failed to capture stdout or stderr")
-	}
-	outStr := string(stdoutBuf.Bytes())
 
-	return outStr, nil
+	stdoutStr := string(stdoutBuf.Bytes())
+
+	return stdoutStr, nil
 }
 
 func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
