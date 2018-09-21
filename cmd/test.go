@@ -170,13 +170,18 @@ func testWithSamples(taskName string, isFull bool, out, errOut io.Writer) error 
 
 	var reportColor *color.Color
 	statusStr := ""
+	if isFull {
+		statusStr = "testcases "
+	} else {
+		statusStr = "samples "
+	}
 	if passCount == totalCount {
 		// passed all sample cases
 		reportColor = color.New(color.FgBlack, color.BgHiGreen)
-		statusStr = "samples AC"
+		statusStr += "AC"
 	} else {
 		reportColor = color.New(color.FgBlack, color.BgHiRed)
-		statusStr = "samples WA"
+		statusStr += "WA"
 	}
 	fmt.Fprintln(out)
 	reportColor.Fprintf(out, "%s (pass: %d, fail: %d, total: %d)\n",
