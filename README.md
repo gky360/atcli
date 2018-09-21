@@ -58,6 +58,6 @@ See `atcli --help` for more deatils.
 
 ## Future work
 
-- fetching test cases used in judges on AtCoder
-- templating your source code
+- ~~fetching test cases used in judges on AtCoder~~ -> Done in v0.1.0
+- ~~templating your source code~~ -> Done in v0.1.0
 - writing tests
