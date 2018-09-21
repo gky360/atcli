@@ -18,12 +18,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
-	"strings"
 
 	. "github.com/gky360/atcli/client"
 	"github.com/gky360/atcli/utils"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,7 +28,6 @@ import (
 type RootOptions struct {
 	Out, ErrOut io.Writer
 
-	cfgFile   string
 	host      string
 	port      string
 	contestID string
@@ -40,7 +36,7 @@ type RootOptions struct {
 }
 
 const (
-	Version = "v0.0.1"
+	Version = "v0.1.0"
 )
 
 var (
@@ -63,8 +59,9 @@ var rootOpt = &RootOptions{
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "atcli",
-	Short: "\"atcli\" is a command line interface for AtCoder (unofficial).",
+	Use:          "atcli",
+	SilenceUsage: true,
+	Short:        "\"atcli\" is a command line interface for AtCoder (unofficial).",
 	Long: fmt.Sprintf("%s\n%s", banner,
 		`"atcli" is a command line interface for AtCoder (unofficial).
 
@@ -72,24 +69,21 @@ A basic flow of the usage of this command is as follows.
 
     1. Start "atsrv" and get auth token.
        (see https://github.com/gky360/atsrv for details)
-    2. Set a user id, contest id and the auth token to the config file
-       (~/.atcli.yaml) using "atcli config" command.
+    2. Set a user id, contest id and the auth token to environment variables.
+       (see Flags section of "atcli --help" for details)
     3. Join a contest using "atcli join" command.
-    4. Generate empty source code file and download sample cases
-       from AtCoder using "atcli clone" command.
-    5. Write your code to the generated source code file (Main.cpp).
-    6. Test your code with downloaded sample cases
-       using "atcli test" command.
+    4. Generate source code file and download sample cases from AtCoder
+       using "atcli clone" command.
+    5. Write your code to the generated source code file (e.g. Main.cpp).
+    6. Test your code with downloaded sample cases using "atcli test" command.
     7. Submit your code to AtCoder using "atcli submit" command.
-    8. Check your submission status
-       using "atcli get submission" command.`),
+    8. Check your submission status using "atcli get submission" command.`),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -97,63 +91,35 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// global flags
-	rootCmd.PersistentFlags().StringVar(&rootOpt.cfgFile, "config", "", "config file (aka. ATCLI_CONFIG) (default $HOME/.atcli.yaml)")
-	viper.BindPFlag("config", rootCmd.PersistentFlags().Lookup("config"))
-
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "", "atsrv host (aka. ATCLI_HOST)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "localhost", "atsrv host (aka. ATSRV_HOST)")
+	viper.BindEnv("host", "ATSRV_HOST")
 	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port (aka. ATCLI_PORT)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port (aka. ATSRV_PORT)")
+	viper.BindEnv("port", "ATSRV_PORT")
 	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv (aka. ATCLI_AUTH_TOKEN)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATSRV_USER_ID)")
+	viper.BindEnv("user.id", "ATSRV_USER_ID")
+	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
+
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv (aka. ATSRV_AUTH_TOKEN)")
+	viper.BindEnv("auth-token", "ATSRV_AUTH_TOKEN")
 	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootPath(), "root directory where atcli create files (aka. ATCLI_ROOT)")
+	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootDir(), "root directory where atcli create files (aka. ATCLI_ROOT)")
+	viper.BindEnv("root", "ATCLI_ROOT")
 	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder (aka. ATCLI_CONTEST_ID)")
+	viper.BindEnv("contest.id", "ATCLI_CONTEST_ID")
 	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 
-	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATCLI_USER_ID)")
-	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
+	viper.BindEnv("cppTemplatePath", "ATCLI_CPP_TEMPLATE_PATH")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.SetEnvPrefix("atcli")
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
-	viper.AutomaticEnv() // read in environment variables that match
-
-	viper.SetConfigType("yaml")
-	if viper.GetString("config") != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(viper.GetString("config"))
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".atcli" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".atcli")
-		cfgFile := filepath.Join(home, ".atcli.yaml")
-		if _, err = os.OpenFile(cfgFile, os.O_RDONLY|os.O_CREATE, 0644); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
 	// set access token to http client
 	host := viper.GetString("host")
 	port := viper.GetString("port")

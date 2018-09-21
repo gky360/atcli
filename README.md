@@ -23,13 +23,13 @@ go get -u github.com/gky360/atcli
 ## Example usage
 
 ```
-# List config
-atcli config
+# Configuration
+# See also https://github.com/gky360/atsrv for more details about ATSRV_AUTH_TOKEN
+export ATSRV_USER_ID=your_atcoder_user_id
+export ATCLI_ROOT=~/atcoder
+export ATCLI_CPP_TEMPLATE_PATH=$ATCLI_ROOT/templates/Main.cpp
+export ATSRV_AUTH_TOKEN=$(cat /dev/urandom | base64 | fold -w 32 | head -n 1)
 
-# Set contest id and `atsrv` token
-# and save config to ~/.atcli.yaml file.
-# See https://github.com/gky360/atsrv for more details about `atsrv` token
-atcli config -c arc090 -a xxxxxxxxxx
 
 # Join contest
 atcli join
@@ -41,7 +41,7 @@ atcli build d
 # Test your source code with sample cases downloaded by `atcli clone`
 atcli test d               # always build your source code
 atcli test d --skip-build  # skip build if possible
-atcli test d 1             # run with a specified sample input
+atcli test d 01            # run with a specified sample input
 
 # Submit your source code to AtCoder
 atcli submit d

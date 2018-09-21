@@ -36,10 +36,11 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version of atcli command",
 	Args:  cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := versionOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(versionOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

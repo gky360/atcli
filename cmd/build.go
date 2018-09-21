@@ -41,7 +41,7 @@ var buildCmd = &cobra.Command{
 
 Example:
     # Build your source code for task 'D'.
-	atcli build d
+    atcli build d
 
 "atcli" supports following languages and compiler commands.
 
@@ -54,10 +54,11 @@ and add the compiler to PATH in advance.
 Your source code file is supposed to be in
 "$ATCLI_ROOT/arc090/d/Main.cpp" , for example.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := buildOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(buildOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
@@ -85,12 +86,12 @@ func (opt *BuildOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 func runBuild(taskName string, isForce bool, out, errOut io.Writer) error {
-	taskPath, err := utils.TaskPath(taskName)
+	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return err
 	}
 
-	if err := os.Chdir(taskPath); err != nil {
+	if err := os.Chdir(taskDir); err != nil {
 		return err
 	}
 	if _, err := os.Stat("a.out"); err == nil {

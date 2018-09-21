@@ -19,7 +19,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -31,6 +30,7 @@ type TestOptions struct {
 	Out, ErrOut io.Writer
 
 	isSkip bool
+	isFull bool
 }
 
 var testOpt = &TestOptions{
@@ -40,7 +40,7 @@ var testOpt = &TestOptions{
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
-	Use:   "test [task name [sample number]]",
+	Use:   "test [task name [sample name]]",
 	Short: "Build, run and test your source code",
 	Long: `Build, run and test your source code.
 
@@ -49,25 +49,27 @@ downloaded sample inputs passed as stdin, prints the stdout and stderr,
 and check if your source code is correct by comparing the stdout and
 downloaded sample outputs.
 
-If you specify a sample number, this command only runs for the
+If you specify a sample name, this command only runs for the
 specified sample input and output.
 
 This command ignores leading and trailing spaces and line breaks when
 it compares the stdout and sample outputs.
 
 Note that this command only compares the outputs as strings, thus it
-can not give correct judges for tasks that accept multiple answers.`,
+can not make correct judgements for tasks that accept multiple answers.`,
 	Args: cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := testOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(testOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(testCmd)
-	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "Skip build if possible.")
+	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
+	testCmd.Flags().BoolVarP(&testOpt.isFull, "full", "", false, "execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -82,23 +84,21 @@ func init() {
 
 func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	taskName := args[0]
-	sampleNum := -1
+	sampleName := ""
 	if len(args) >= 2 {
-		if sampleNum, err = strconv.Atoi(args[1]); err != nil {
-			return err
-		}
+		sampleName = args[1]
 	}
 
 	if err := runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
-	if sampleNum >= 0 {
-		if _, err := testWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+	if sampleName == "" {
+		if err := testWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if err := testWithSamples(taskName, opt.Out, opt.ErrOut); err != nil {
+		if _, err := testWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -118,13 +118,13 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
-func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) (bool, error) {
-	res, err := runWithSample(taskName, sampleNum, out, errOut)
+func testWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (bool, error) {
+	res, err := runWithSample(taskName, sampleName, isFull, out, errOut)
 	if err != nil {
 		return false, err
 	}
 
-	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleNum)
+	taskOutputFilePath, err := utils.TaskOutputFilePath(taskName, sampleName, isFull)
 	if err != nil {
 		return false, err
 	}
@@ -149,33 +149,39 @@ func testWithSample(taskName string, sampleNum int, out, errOut io.Writer) (bool
 	return isPass, nil
 }
 
-func testWithSamples(taskName string, out, errOut io.Writer) error {
+func testWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
 	totalCount := 0
 	passCount := 0
-	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		isPass, err := testWithSample(taskName, sampleNum, out, errOut)
-		switch err := err.(type) {
-		case nil:
-			totalCount++
-			if isPass {
-				passCount++
-			}
-		case *SampleInputNotExistError:
-			// task did not have sample with this sampleNum
-		default:
+
+	sampleNames, err := utils.GetSampleNames(taskName, isFull)
+	if err != nil {
+		return err
+	}
+	for _, sampleName := range sampleNames {
+		isPass, err := testWithSample(taskName, sampleName, isFull, out, errOut)
+		if err != nil {
 			return err
+		}
+		totalCount++
+		if isPass {
+			passCount++
 		}
 	}
 
 	var reportColor *color.Color
 	statusStr := ""
+	if isFull {
+		statusStr = "testcases "
+	} else {
+		statusStr = "samples "
+	}
 	if passCount == totalCount {
 		// passed all sample cases
 		reportColor = color.New(color.FgBlack, color.BgHiGreen)
-		statusStr = "samples AC"
+		statusStr += "AC"
 	} else {
 		reportColor = color.New(color.FgBlack, color.BgHiRed)
-		statusStr = "samples WA"
+		statusStr += "WA"
 	}
 	fmt.Fprintln(out)
 	reportColor.Fprintf(out, "%s (pass: %d, fail: %d, total: %d)\n",

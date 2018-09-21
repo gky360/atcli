@@ -43,10 +43,11 @@ var getCmd = &cobra.Command{
 "atcli get" command gets contest, tasks, submissions from "atsrv" and
 prints the data in yaml format.`,
 	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := getOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(getOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
@@ -68,7 +69,7 @@ func (opt *GetOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	// get contest
 	contestID := viper.GetString("contest.id")
 	contest := new(models.Contest)
-	if _, err = Client.GetContest(contestID, contest); err != nil {
+	if _, err = Client.GetContest(contestID, false, contest); err != nil {
 		return err
 	}
 

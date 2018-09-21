@@ -6,13 +6,28 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/gky360/atsrv/models"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
-func DefaultRootPath() string {
+const (
+	MsgContestIDRequired = "Contest id is required. Try '--help' option for help."
+	MsgTaskNameRequired  = "Task name is required. Try '--help' option for help."
+	MsgSbmIDRequired     = "Submission id is required. Try '--help' option for help."
+	MsgSbmSourceRequired = "Submission source is required. Try '--help' option for help."
+)
+
+type (
+	TemplateData struct {
+		Contest *models.Contest
+		Task    *models.Task
+	}
+)
+
+func DefaultRootDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(err)
@@ -21,92 +36,137 @@ func DefaultRootPath() string {
 	return filepath.Join(home, "atcoder")
 }
 
-func RootPath() string {
-	rootPath := viper.GetString("root")
-	if rootPath == "" {
-		rootPath = DefaultRootPath()
+func RootDir() string {
+	rootDir := viper.GetString("root")
+	if rootDir == "" {
+		rootDir = DefaultRootDir()
 	}
-	return rootPath
+	return rootDir
 }
 
-func ContestPath() (string, error) {
+func ContestDir() (string, error) {
 	contestID := viper.GetString("contest.id")
 	if contestID == "" {
-		return "", fmt.Errorf("Contest id is required.")
+		return "", fmt.Errorf(MsgContestIDRequired)
 	}
-	return filepath.Join(RootPath(), contestID), nil
+	return filepath.Join(RootDir(), contestID), nil
 }
 
-func TaskPath(taskName string) (string, error) {
+func TaskDir(taskName string) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	contestPath, err := ContestPath()
+	contestDir, err := ContestDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(contestPath, strings.ToLower(taskName)), nil
+	return filepath.Join(contestDir, strings.ToLower(taskName)), nil
 }
 
 func TaskSourceFilePath(taskName string) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskPath, err := TaskPath(taskName)
+	taskDir, err := TaskDir(taskName)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskPath, "Main.cpp"), nil
+	return filepath.Join(taskDir, "Main.cpp"), nil
 }
 
-func TaskSamplePath(taskName string) (string, error) {
+func TaskSampleDir(taskName string, isForTestcases bool) (string, error) {
 	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
+		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskPath, err := TaskPath(taskName)
+	taskDir, err := TaskDir(taskName)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskPath, "samples"), nil
+	dirname := "samples"
+	if isForTestcases {
+		dirname = "testcases"
+	}
+	return filepath.Join(taskDir, dirname), nil
 }
 
-func TaskInputFilePath(taskName string, sampleNum int) (string, error) {
-	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
-	}
-	taskSamplePath, err := TaskSamplePath(taskName)
+func TaskSampleInDir(taskName string, isForTestcases bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSamplePath, fmt.Sprintf("%02d.in.txt", sampleNum)), nil
+	return filepath.Join(taskSampleDir, "in"), nil
 }
 
-func TaskOutputFilePath(taskName string, sampleNum int) (string, error) {
-	if taskName == "" {
-		return "", fmt.Errorf("Task name is required.")
-	}
-	taskSamplePath, err := TaskSamplePath(taskName)
+func TaskSampleOutDir(taskName string, isForTestcases bool) (string, error) {
+	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSamplePath, fmt.Sprintf("%02d.out.txt", sampleNum)), nil
+	return filepath.Join(taskSampleDir, "out"), nil
+}
+
+func TaskInputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
+	if taskName == "" {
+		return "", fmt.Errorf(MsgTaskNameRequired)
+	}
+	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(taskSampleInDir, sampleName+".txt"), nil
+}
+
+func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
+	if taskName == "" {
+		return "", fmt.Errorf(MsgTaskNameRequired)
+	}
+	taskSampleOutDir, err := TaskSampleOutDir(taskName, isForTestcases)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(taskSampleOutDir, sampleName+".txt"), nil
+}
+
+func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
+	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = os.Stat(taskSampleInDir); err != nil {
+		return nil, err
+	}
+
+	pat := filepath.Join(taskSampleInDir, "*.txt")
+	g, err := filepath.Glob(pat)
+	sampleNames := make([]string, len(g))
+	for i, fpath := range g {
+		sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+	}
+	return sampleNames, nil
 }
 
 func CreateDirsForTask(task *models.Task) error {
 	if task.Name == "" {
-		return fmt.Errorf("Task name is required.")
+		return fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSamplePath, err := TaskSamplePath(task.Name)
+	taskSampleInDir, err := TaskSampleInDir(task.Name, false)
 	if err != nil {
 		return err
 	}
-	if err = os.MkdirAll(taskSamplePath, os.ModePerm); err != nil {
+	taskSampleOutDir, err := TaskSampleOutDir(task.Name, false)
+	if err != nil {
+		return err
+	}
+	if err = os.MkdirAll(taskSampleInDir, 0755); err != nil {
+		return err
+	}
+	if err = os.MkdirAll(taskSampleOutDir, 0755); err != nil {
 		return err
 	}
 	return nil
 }
 
-func CreateSourceFile(task *models.Task) error {
+func CreateSourceFile(contest *models.Contest, task *models.Task) error {
 	if err := CreateDirsForTask(task); err != nil {
 		return err
 	}
@@ -114,25 +174,56 @@ func CreateSourceFile(task *models.Task) error {
 	if err != nil {
 		return err
 	}
-	_, err = os.OpenFile(taskSourceFilePath, os.O_RDONLY|os.O_CREATE, 0644)
+	taskSrouceFilePathRel, err := filepath.Rel(RootDir(), taskSourceFilePath)
 	if err != nil {
 		return err
 	}
-	taskSrouceFilePathRel, err := filepath.Rel(RootPath(), taskSourceFilePath)
-	if err != nil {
-		return err
+
+	if _, err := os.Stat(taskSourceFilePath); err == nil {
+		// Already exists
+		fmt.Printf("Already exists: %s\n", taskSrouceFilePathRel)
+		return nil
 	}
-	fmt.Printf("Created file: %s\n", taskSrouceFilePathRel)
+
+	cppTemplatePath := viper.GetString("cppTemplatePath")
+	if cppTemplatePath == "" {
+		// Create empty source file
+		_, err = os.OpenFile(taskSourceFilePath, os.O_RDONLY|os.O_CREATE, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		// Create source file from template
+		tmplData := TemplateData{
+			Contest: contest,
+			Task:    task,
+		}
+		t, err := template.ParseFiles(cppTemplatePath)
+		if err != nil {
+			return err
+		}
+		f, err := os.Create(taskSourceFilePath)
+		if err != nil {
+			return err
+		}
+		err = t.Execute(f, tmplData)
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("Created file  : %s\n", taskSrouceFilePathRel)
 	return nil
 }
 
 func CreateSampleFiles(task *models.Task) error {
 	for _, sample := range task.Samples {
-		taskInputFilePath, err := TaskInputFilePath(task.Name, sample.Num)
+		sampleName := fmt.Sprintf("sample%02d", sample.Num)
+		taskInputFilePath, err := TaskInputFilePath(task.Name, sampleName, false)
 		if err != nil {
 			return err
 		}
-		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sample.Num)
+		taskOutputFilePath, err := TaskOutputFilePath(task.Name, sampleName, false)
 		if err != nil {
 			return err
 		}
@@ -145,18 +236,18 @@ func CreateSampleFiles(task *models.Task) error {
 		}
 
 		for _, filePath := range []string{taskInputFilePath, taskOutputFilePath} {
-			filePathRel, err := filepath.Rel(RootPath(), filePath)
+			filePathRel, err := filepath.Rel(RootDir(), filePath)
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Created file: %s\n", filePathRel)
+			fmt.Printf("Created file  : %s\n", filePathRel)
 		}
 	}
 	return nil
 }
 
-func CreateFilesForTask(task *models.Task) error {
-	if err := CreateSourceFile(task); err != nil {
+func CreateFilesForTask(contest *models.Contest, task *models.Task) error {
+	if err := CreateSourceFile(contest, task); err != nil {
 		return err
 	}
 	if err := CreateSampleFiles(task); err != nil {
@@ -165,9 +256,9 @@ func CreateFilesForTask(task *models.Task) error {
 	return nil
 }
 
-func CreateFilesForTasks(tasks []*models.Task) error {
+func CreateFilesForTasks(contest *models.Contest, tasks []*models.Task) error {
 	for _, task := range tasks {
-		if err := CreateFilesForTask(task); err != nil {
+		if err := CreateFilesForTask(contest, task); err != nil {
 			return err
 		}
 	}

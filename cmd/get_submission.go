@@ -52,18 +52,19 @@ When you specify submission id, one submission will be returned.
 When you specify task name flag or submission status flag, multiple
 submissions will be returned filtered by the flags.`,
 	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := getSbmOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(getSbmOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
 func init() {
 	getCmd.AddCommand(getSubmissionCmd)
 
-	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.taskName, "task", "t", "", "Task name")
-	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.status, "status", "s", "", "Submission status")
+	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.taskName, "task", "t", "", "task name")
+	getSubmissionCmd.Flags().StringVarP(&getSbmOpt.status, "status", "s", "", "submission status")
 
 	// Here you will define your flags and configuration settings.
 

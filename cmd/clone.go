@@ -28,6 +28,7 @@ import (
 
 type CloneOptions struct {
 	Out, ErrOut io.Writer
+	isFull      bool
 }
 
 var cloneOpt = &CloneOptions{
@@ -42,44 +43,66 @@ var cloneCmd = &cobra.Command{
 	Long: `Create source code files and download sample cases.
 
 Example:
+    # Create source code files and download sample cases from AtCoder's task page.
     atcli clone
 
+If you specify your source code template file path to ATCLI_CPP_TEMPLATE_PATH,
+"atcli clone" command generates source code files from the specified
+template file.
+
+With --full option, "atcli clone --full" command downloads full testcases
+from AtCoder's dropbox folder https://bit.ly/2xywjgh . Those testcases are
+acually used in AtCoder's judge system. This option works only after AtCoder
+uploads the testcases of the contest.
+
 "atcli clone" command generates files into the following directory structure.
+Downloaded sample cases will be saved in "$ATCLI_ROOT/arc090/d/samples" ,
+and downloaded full testcases will be saved in "$ATCLI_ROOT/arc090/d/testcases" ,
+for example.
 
 $ATCLI_ROOT/
-├── arc090
-     ├── c
+├── arc090/
+     ├── c/
      │   ├── Main.cpp
-     │   └── samples
-     │       ├── 01.in.txt
-     │       ├── 01.out.txt
-     │       ├── 02.in.txt
-     │       ├── 02.out.txt
-     │       ├── ...
-     ├── d
+     │   ├── samples/
+     │   │  ├── in/
+     │   │  │  ├── sample01.txt
+     │   │  │  ├── sample02.txt
+     │   │  │  ├── ...
+     │   │  └── out/
+     │   │      ├── sample01.txt
+     │   │      ├── sample02.txt
+     │   │      ├── ...
+     │   └── (testcases/)
+     │       ├── in/
+     │       │  ├── 0_000.txt
+     │       │  ├── 0_001.txt
+     │       │  ├── ...
+     │       └── out/
+     │           ├── 0_000.txt
+     │           ├── 0_001.txt
+     │           ├── ...
+     ├── d/
      │   ├── Main.cpp
-     │   └── samples
-     │       ├── ...
-     ├── e
-     │   ├── Main.cpp
-     │   └── samples
-     │       ├── ...
-     └── f
-         ├── Main.cpp
-         └── samples
-             ├── ...
-
-To configure $ATCLI_ROOT, see "atcli config --help" .`,
-	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+     │   ├── samples/
+     │   └── (testcases/)
+     ├── e/
+     │   └── ...
+     └── f/
+          └── ...
+`,
+	Args: cobra.RangeArgs(0, 1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := cloneOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(cloneOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(cloneCmd)
+	cloneCmd.Flags().BoolVarP(&cloneOpt.isFull, "full", "", false, "download full testcases used in AtCoder's judge system.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -94,28 +117,44 @@ func init() {
 
 func (opt *CloneOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
-	if err = runClone(contestID, opt.Out, opt.ErrOut); err != nil {
+	if err = runClone(contestID, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func runClone(contestID string, out, errOut io.Writer) error {
+func runClone(contestID string, isFull bool, out, errOut io.Writer) error {
+	contest := new(models.Contest)
+	_, err := Client.GetContest(contestID, isFull, contest)
+	if err != nil {
+		return err
+	}
+	contestYaml, err := contest.ToYaml()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(out, contestYaml)
+
 	_, tasks, err := Client.GetTasks(contestID, true)
 	if err != nil {
 		return err
 	}
-
 	tasksYaml, err := models.TasksToYaml(tasks)
 	if err != nil {
 		return err
 	}
-
 	fmt.Fprintln(out, tasksYaml)
 
-	if err = utils.CreateFilesForTasks(tasks); err != nil {
+	fmt.Fprintf(out, "atcli root: %s\n", utils.RootDir())
+	if err = utils.CreateFilesForTasks(contest, tasks); err != nil {
 		return err
+	}
+
+	if isFull {
+		if err := utils.DownloadTestcases(contest, tasks); err != nil {
+			return err
+		}
 	}
 
 	return nil

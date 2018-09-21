@@ -18,19 +18,19 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
-	"strconv"
+
+	"github.com/spf13/cobra"
 
 	"github.com/gky360/atcli/utils"
-	"github.com/spf13/cobra"
 )
 
 type RunOptions struct {
 	Out, ErrOut io.Writer
 
 	isSkip bool
+	isFull bool
 }
 
 var runOpt = &RunOptions{
@@ -40,7 +40,7 @@ var runOpt = &RunOptions{
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run [task name [sample number]]",
+	Use:   "run [task name [sample name]]",
 	Short: "Build and execute your source code for a task",
 	Long: `Build and execute your source code for a task.
 
@@ -48,19 +48,21 @@ var runCmd = &cobra.Command{
 downloaded sample inputs passed as stdin, and prints the stdout and
 stderr.
 
-If you specify a sample number, this command only runs for the specified
+If you specify a sample name, this command only runs for the specified
 sample input.`,
 	Args: cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := runOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(runOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
+	runCmd.Flags().BoolVarP(&runOpt.isFull, "full", "", false, "execute with full testcases inputs.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -73,25 +75,23 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
+func (opt *RunOptions) Run(cmd *cobra.Command, args []string) error {
 	taskName := args[0]
-	sampleNum := -1
+	sampleName := ""
 	if len(args) >= 2 {
-		if sampleNum, err = strconv.Atoi(args[1]); err != nil {
-			return err
-		}
+		sampleName = args[1]
 	}
 
 	if err := runBuild(taskName, !opt.isSkip, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
-	if sampleNum >= 0 {
-		if _, err := runWithSample(taskName, sampleNum, opt.Out, opt.ErrOut); err != nil {
+	if sampleName == "" {
+		if err := runWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if err := runWithSamples(taskName, opt.Out, opt.ErrOut); err != nil {
+		if _, err := runWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -99,16 +99,16 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return nil
 }
 
-func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (string, error) {
-	taskPath, err := utils.TaskPath(taskName)
+func runWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (string, error) {
+	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return "", err
 	}
-	if err := os.Chdir(taskPath); err != nil {
+	if err := os.Chdir(taskDir); err != nil {
 		return "", err
 	}
 
-	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleNum)
+	taskInputFilePath, err := utils.TaskInputFilePath(taskName, sampleName, isFull)
 	if err != nil {
 		return "", err
 	}
@@ -121,58 +121,40 @@ func runWithSample(taskName string, sampleNum int, out, errOut io.Writer) (strin
 		}
 		return "", err
 	}
-	fmt.Fprintf(out, "\n--- Task name: %s, Sample number: %02d\n", taskName, sampleNum)
+	fmt.Fprintf(out, "\n--- Task name: %s, Sample name: %s\n", taskName, sampleName)
 
-	inBytes, err := ioutil.ReadFile(taskInputFilePath)
+	tIn, err := os.Open(taskInputFilePath)
 	if err != nil {
 		return "", err
 	}
 
-	var stdoutBuf, stderrBuf bytes.Buffer
-	var errStdout, errStderr error
-	outWriter := io.MultiWriter(out, &stdoutBuf)
-	errOutWriter := io.MultiWriter(errOut, &stderrBuf)
-
+	var stdoutBuf bytes.Buffer
 	execCmd := exec.Command("./a.out")
-	execCmdOut, _ := execCmd.StdoutPipe()
-	execCmdErrOut, _ := execCmd.StderrPipe()
-	execCmdIn, _ := execCmd.StdinPipe()
+	execCmd.Stdin = tIn
+	execCmd.Stdout = io.MultiWriter(out, &stdoutBuf)
+	execCmd.Stderr = errOut
 
 	if err = execCmd.Start(); err != nil {
 		return "", err
 	}
-
-	go func() {
-		defer execCmdIn.Close()
-		execCmdIn.Write(inBytes)
-	}()
-	go func() {
-		_, errStdout = io.Copy(outWriter, execCmdOut)
-	}()
-	go func() {
-		_, errStderr = io.Copy(errOutWriter, execCmdErrOut)
-	}()
-
 	if err = execCmd.Wait(); err != nil {
 		return "", err
 	}
-	if errStdout != nil || errStderr != nil {
-		return "", fmt.Errorf("Failed to capture stdout or stderr")
-	}
-	outStr := string(stdoutBuf.Bytes())
 
-	return outStr, nil
+	stdoutStr := string(stdoutBuf.Bytes())
+
+	return stdoutStr, nil
 }
 
-func runWithSamples(taskName string, out, errOut io.Writer) error {
-	for sampleNum := 0; sampleNum <= 99; sampleNum++ {
-		_, err := runWithSample(taskName, sampleNum, out, errOut)
-		switch err := err.(type) {
-		case nil:
-			// it's ok
-		case *SampleInputNotExistError:
-			// it's ok
-		default:
+func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
+	sampleNames, err := utils.GetSampleNames(taskName, isFull)
+	if err != nil {
+		return err
+	}
+
+	for _, sampleName := range sampleNames {
+		_, err := runWithSample(taskName, sampleName, isFull, out, errOut)
+		if err != nil {
 			return err
 		}
 	}
