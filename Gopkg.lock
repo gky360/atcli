@@ -22,8 +22,8 @@
     "modules",
     "pages"
   ]
-  revision = "30abe1399bad593ddfd2656c9ae7f2e99da2f84a"
-  version = "v0.0.1"
+  revision = "5e839f50296633ac142031eee2d3a84f817c0a4d"
+  version = "v0.1.0"
 
 [[projects]]
   name = "github.com/hashicorp/hcl"
@@ -179,13 +179,13 @@
     "idna",
     "publicsuffix"
   ]
-  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
+  revision = "2f5d2388922f370f4355f327fcf4cfe9f5583908"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "d0be0721c37eeb5299f245a996a483160fc36940"
+  revision = "d641721ec2dead6fe5ca284096fe4b1fcd49e427"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -262,6 +262,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0f17c0bec1dd5a563b4d2ebe95f73c36088633a086fc948b1781f1fec39db39d"
+  inputs-digest = "eff5cba8284832136189e1d1b4e724f8d3eb826784cbfd4930a6608e2a46e5f8"
   solver-name = "gps-cdcl"
   solver-version = 1
