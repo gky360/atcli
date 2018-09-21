@@ -23,8 +23,8 @@ import (
 )
 
 type NewOptions struct {
-	Out, ErrOut   io.Writer
-	withTestcases bool
+	Out, ErrOut io.Writer
+	isFull      bool
 }
 
 var newOpt = &NewOptions{
@@ -55,7 +55,7 @@ command instead.`,
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-	newCmd.Flags().BoolVarP(&newOpt.withTestcases, "with-testcases", "", false, "download full testcases used in the contest.")
+	newCmd.Flags().BoolVarP(&newOpt.isFull, "full", "", false, "download full testcases used in AtCoder's judge system.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -73,7 +73,7 @@ func (opt *NewOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	if err = runJoin(contestID, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
-	if err = runClone(contestID, opt.withTestcases, opt.Out, opt.ErrOut); err != nil {
+	if err = runClone(contestID, opt.isFull, opt.Out, opt.ErrOut); err != nil {
 		return err
 	}
 
