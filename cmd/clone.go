@@ -43,7 +43,7 @@ var cloneCmd = &cobra.Command{
 	Long: `Create source code files and download sample cases.
 
 Example:
-	# Create source code files and download sample cases from AtCoder's task page.
+    # Create source code files and download sample cases from AtCoder's task page.
     atcli clone
 
 If you specify your source code template file path to ATCLI_CPP_TEMPLATE_PATH,

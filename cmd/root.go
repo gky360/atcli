@@ -73,7 +73,7 @@ A basic flow of the usage of this command is as follows.
        (see Flags section of "atcli --help" for details)
     3. Join a contest using "atcli join" command.
     4. Generate source code file and download sample cases from AtCoder
-	   using "atcli clone" command.
+       using "atcli clone" command.
     5. Write your code to the generated source code file (e.g. Main.cpp).
     6. Test your code with downloaded sample cases using "atcli test" command.
     7. Submit your code to AtCoder using "atcli submit" command.
