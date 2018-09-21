@@ -58,10 +58,11 @@ it compares the stdout and sample outputs.
 Note that this command only compares the outputs as strings, thus it
 can not make correct judgements for tasks that accept multiple answers.`,
 	Args: cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := testOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(testOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

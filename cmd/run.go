@@ -51,10 +51,11 @@ stderr.
 If you specify a sample name, this command only runs for the specified
 sample input.`,
 	Args: cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := runOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(runOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
@@ -74,7 +75,7 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func (opt *RunOptions) Run(cmd *cobra.Command, args []string) (err error) {
+func (opt *RunOptions) Run(cmd *cobra.Command, args []string) error {
 	taskName := args[0]
 	sampleName := ""
 	if len(args) >= 2 {
@@ -154,7 +155,7 @@ func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
 	for _, sampleName := range sampleNames {
 		_, err := runWithSample(taskName, sampleName, isFull, out, errOut)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 

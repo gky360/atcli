@@ -59,8 +59,9 @@ var rootOpt = &RootOptions{
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "atcli",
-	Short: "\"atcli\" is a command line interface for AtCoder (unofficial).",
+	Use:          "atcli",
+	SilenceUsage: true,
+	Short:        "\"atcli\" is a command line interface for AtCoder (unofficial).",
 	Long: fmt.Sprintf("%s\n%s", banner,
 		`"atcli" is a command line interface for AtCoder (unofficial).
 
@@ -83,7 +84,6 @@ A basic flow of the usage of this command is as follows.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }

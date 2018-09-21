@@ -45,10 +45,11 @@ in yaml format.
 
 When you specify task name, one task will be returned.`,
 	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := getTaskOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(getTaskOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

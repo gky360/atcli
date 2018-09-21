@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -46,10 +45,11 @@ If you already have joined the contest (i.e. the "Register" button is
 not displayed), this command will fail. You just need to run "atcli clone"
 command instead.`,
 	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := newOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(newOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

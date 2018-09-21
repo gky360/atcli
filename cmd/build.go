@@ -54,10 +54,11 @@ and add the compiler to PATH in advance.
 Your source code file is supposed to be in
 "$ATCLI_ROOT/arc090/d/Main.cpp" , for example.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := buildOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(buildOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

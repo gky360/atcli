@@ -46,10 +46,11 @@ is displayed on the contest page.
 If you already have joined the contest (i.e. the "Register" button is not
 displayed), this command will fail.`,
 	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := joinOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(joinOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

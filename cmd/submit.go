@@ -46,10 +46,11 @@ var submitCmd = &cobra.Command{
 "atcli submit" command submits your source code for a specified task
 to AtCoder.`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := submitOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(submitOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

@@ -44,10 +44,11 @@ var getContestCmd = &cobra.Command{
 "atcli get contest" command gets contest from "atsrv" and prints
 the data in yaml format.`,
 	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := getContestOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(getContestOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 

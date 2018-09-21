@@ -52,10 +52,11 @@ When you specify submission id, one submission will be returned.
 When you specify task name flag or submission status flag, multiple
 submissions will be returned filtered by the flags.`,
 	Args: cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := getSbmOpt.Run(cmd, args); err != nil {
-			fmt.Fprintln(getSbmOpt.ErrOut, err)
+			return err
 		}
+		return nil
 	},
 }
 
