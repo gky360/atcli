@@ -66,21 +66,21 @@ $ATCLI_ROOT/
      │   ├── Main.cpp
      │   ├── samples/
      │   │  ├── in/
-     │   │  │  ├── 01.txt
-     │   │  │  ├── 02.txt
+     │   │  │  ├── sample01.txt
+     │   │  │  ├── sample02.txt
      │   │  │  ├── ...
      │   │  └── out/
-     │   │      ├── 01.txt
-     │   │      ├── 02.txt
+     │   │      ├── sample01.txt
+     │   │      ├── sample02.txt
      │   │      ├── ...
      │   └── (testcases/)
      │       ├── in/
-     │       │  ├── 01.txt
-     │       │  ├── 02.txt
+     │       │  ├── 0_000.txt
+     │       │  ├── 0_001.txt
      │       │  ├── ...
      │       └── out/
-     │           ├── 01.txt
-     │           ├── 02.txt
+     │           ├── 0_000.txt
+     │           ├── 0_001.txt
      │           ├── ...
      ├── d/
      │   ├── Main.cpp
