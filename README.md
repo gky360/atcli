@@ -13,6 +13,11 @@
 Command line interface for AtCoder (unofficial)
 
 
+## Requirements
+
+- [atsrv](https://github.com/gky360/atsrv)
+
+
 ## Installation
 
 ```
