@@ -109,8 +109,11 @@ func runBuild(taskName string, isForce bool, out, errOut io.Writer) error {
 	)
 	execCmd.Stdout = out
 	execCmd.Stderr = errOut
-	execCmd.Run()
-	if err != nil {
+
+	if err = execCmd.Start(); err != nil {
+		return err
+	}
+	if err = execCmd.Wait(); err != nil {
 		return err
 	}
 
