@@ -153,9 +153,9 @@ func testWithSample(taskName string, sampleName string, isFull bool, out, errOut
 		isPass = true
 	} else {
 		failureColor := color.New(color.FgRed)
-		failureColor.Fprintln(out, "Test: fail")
 		failureColor.Fprintln(out, "Correct output:")
 		fmt.Fprintln(out, sampleOut)
+		failureColor.Fprintln(out, "Test: fail")
 	}
 
 	return isPass, nil
