@@ -29,8 +29,9 @@ import (
 type TestOptions struct {
 	Out, ErrOut io.Writer
 
-	isSkip bool
-	isFull bool
+	isSkip  bool
+	isFull  bool
+	isQuiet bool
 }
 
 var testOpt = &TestOptions{
@@ -70,6 +71,7 @@ func init() {
 	rootCmd.AddCommand(testCmd)
 	testCmd.Flags().BoolVarP(&testOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
 	testCmd.Flags().BoolVarP(&testOpt.isFull, "full", "", false, "execute with full testcases inputs.")
+	testCmd.Flags().BoolVarP(&testOpt.isQuiet, "quiet", "q", false, "don't show stdout of your program.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -94,11 +96,11 @@ func (opt *TestOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if sampleName == "" {
-		if err := testWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
+		if err := testWithSamples(taskName, opt.isFull, opt.isQuiet, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if _, err := testWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
+		if _, err := testWithSample(taskName, sampleName, opt.isFull, opt.isQuiet, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -130,8 +132,8 @@ func normalizeStr(str string) string {
 	return convNewline(strings.TrimSpace(str), "\n")
 }
 
-func testWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (bool, error) {
-	res, err := runWithSample(taskName, sampleName, isFull, out, errOut)
+func testWithSample(taskName string, sampleName string, isFull, isQuiet bool, out, errOut io.Writer) (bool, error) {
+	res, err := runWithSample(taskName, sampleName, isFull, isQuiet, out, errOut)
 	if err != nil {
 		return false, err
 	}
@@ -153,15 +155,17 @@ func testWithSample(taskName string, sampleName string, isFull bool, out, errOut
 		isPass = true
 	} else {
 		failureColor := color.New(color.FgRed)
-		failureColor.Fprintln(out, "Correct output:")
-		fmt.Fprintln(out, sampleOut)
+		if !isQuiet {
+			failureColor.Fprintln(out, "Correct output:")
+			fmt.Fprintln(out, sampleOut)
+		}
 		failureColor.Fprintln(out, "Test: fail")
 	}
 
 	return isPass, nil
 }
 
-func testWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
+func testWithSamples(taskName string, isFull, isQuiet bool, out, errOut io.Writer) error {
 	totalCount := 0
 	passCount := 0
 
@@ -170,7 +174,7 @@ func testWithSamples(taskName string, isFull bool, out, errOut io.Writer) error 
 		return err
 	}
 	for _, sampleName := range sampleNames {
-		isPass, err := testWithSample(taskName, sampleName, isFull, out, errOut)
+		isPass, err := testWithSample(taskName, sampleName, isFull, isQuiet, out, errOut)
 		if err != nil {
 			return err
 		}
