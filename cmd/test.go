@@ -118,6 +118,18 @@ func NewSampleInputNotExistError(msg string) *SampleInputNotExistError {
 	return &SampleInputNotExistError{msg}
 }
 
+func convNewline(str, nlcode string) string {
+	return strings.NewReplacer(
+		"\r\n", nlcode,
+		"\r", nlcode,
+		"\n", nlcode,
+	).Replace(str)
+}
+
+func normalizeStr(str string) string {
+	return convNewline(strings.TrimSpace(str), "\n")
+}
+
 func testWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (bool, error) {
 	res, err := runWithSample(taskName, sampleName, isFull, out, errOut)
 	if err != nil {
@@ -135,7 +147,7 @@ func testWithSample(taskName string, sampleName string, isFull bool, out, errOut
 	sampleOut := string(sampleOutByte)
 
 	isPass := false
-	if strings.Compare(strings.TrimSpace(res), strings.TrimSpace(sampleOut)) == 0 {
+	if strings.Compare(normalizeStr(res), normalizeStr(sampleOut)) == 0 {
 		successColor := color.New(color.FgGreen)
 		successColor.Fprintln(out, "Test: pass")
 		isPass = true
