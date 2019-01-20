@@ -29,8 +29,9 @@ import (
 type RunOptions struct {
 	Out, ErrOut io.Writer
 
-	isSkip bool
-	isFull bool
+	isSkip  bool
+	isFull  bool
+	isQuiet bool
 }
 
 var runOpt = &RunOptions{
@@ -63,6 +64,7 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&runOpt.isSkip, "skip-build", "s", false, "skip build if possible.")
 	runCmd.Flags().BoolVarP(&runOpt.isFull, "full", "", false, "execute with full testcases inputs.")
+	runCmd.Flags().BoolVarP(&runOpt.isQuiet, "quiet", "q", false, "don't show stdout of your program.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -87,11 +89,11 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) error {
 	}
 
 	if sampleName == "" {
-		if err := runWithSamples(taskName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
+		if err := runWithSamples(taskName, opt.isFull, opt.isQuiet, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	} else {
-		if _, err := runWithSample(taskName, sampleName, opt.isFull, opt.Out, opt.ErrOut); err != nil {
+		if _, err := runWithSample(taskName, sampleName, opt.isFull, opt.isQuiet, opt.Out, opt.ErrOut); err != nil {
 			return err
 		}
 	}
@@ -99,7 +101,7 @@ func (opt *RunOptions) Run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func runWithSample(taskName string, sampleName string, isFull bool, out, errOut io.Writer) (string, error) {
+func runWithSample(taskName string, sampleName string, isFull, isQuiet bool, out, errOut io.Writer) (string, error) {
 	taskDir, err := utils.TaskDir(taskName)
 	if err != nil {
 		return "", err
@@ -131,7 +133,11 @@ func runWithSample(taskName string, sampleName string, isFull bool, out, errOut 
 	var stdoutBuf bytes.Buffer
 	execCmd := exec.Command("./a.out")
 	execCmd.Stdin = tIn
-	execCmd.Stdout = io.MultiWriter(out, &stdoutBuf)
+	if isQuiet {
+		execCmd.Stdout = &stdoutBuf
+	} else {
+		execCmd.Stdout = io.MultiWriter(out, &stdoutBuf)
+	}
 	execCmd.Stderr = errOut
 
 	if err = execCmd.Start(); err != nil {
@@ -146,14 +152,14 @@ func runWithSample(taskName string, sampleName string, isFull bool, out, errOut 
 	return stdoutStr, nil
 }
 
-func runWithSamples(taskName string, isFull bool, out, errOut io.Writer) error {
+func runWithSamples(taskName string, isFull, isQuiet bool, out, errOut io.Writer) error {
 	sampleNames, err := utils.GetSampleNames(taskName, isFull)
 	if err != nil {
 		return err
 	}
 
 	for _, sampleName := range sampleNames {
-		_, err := runWithSample(taskName, sampleName, isFull, out, errOut)
+		_, err := runWithSample(taskName, sampleName, isFull, isQuiet, out, errOut)
 		if err != nil {
 			return err
 		}

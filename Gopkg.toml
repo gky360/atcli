@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "github.com/gky360/atsrv"
-  version = "0.1.1"
+  version = "0.1.2"
 
 [[constraint]]
   name = "github.com/mitchellh/go-homedir"
