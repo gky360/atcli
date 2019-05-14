@@ -1,22 +1,26 @@
-build: off
-
-platform: x64
-
 clone_folder: c:\gopath\src\github.com\gky360\atcli
+clone_depth: 1
 
 environment:
   GOPATH: c:\gopath
+  matrix:
+    - CYG_ARCH: x86_64
+      CYG_ROOT: C:/cygwin64
 
 stack: go 1.12
 
 install:
+  - set PATH=%GOPATH%\bin;c:\go\bin;C:\MinGW\bin;%PATH%
   - echo %PATH%
   - echo %GOPATH%
-  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
   - go env
+  - gcc --version
+
   - go get -u github.com/golang/dep/...
   - dep ensure
+
+build: off
 
 test_script:
   - go test -v -race ./...
