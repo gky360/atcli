@@ -10,9 +10,6 @@ stack: go 1.12
 install:
   - go version
   - go env
-  # install golangci-lint
-  - go get -u -v github.com/golangci/golangci-lint/cmd/golangci-lint
 
 test_script:
-  - golangci-lint run
   - go test -v -race ./...
