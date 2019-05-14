@@ -25,7 +25,6 @@ import (
 
 type EnvOptions struct {
 	Out, ErrOut io.Writer
-	isFull      bool
 }
 
 var envOpt = &EnvOptions{

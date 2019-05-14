@@ -137,7 +137,7 @@ func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
 	}
 
 	pat := filepath.Join(taskSampleInDir, "*.txt")
-	g, err := filepath.Glob(pat)
+	g, _ := filepath.Glob(pat)
 	sampleNames := make([]string, len(g))
 	for i, fpath := range g {
 		sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")

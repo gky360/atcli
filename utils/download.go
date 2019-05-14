@@ -101,7 +101,9 @@ func unzip(src, dest string) error {
 	fmt.Println("Unziping", src)
 	fmt.Println("to", dest, "...")
 
-	os.MkdirAll(dest, 0755)
+	if err := os.MkdirAll(dest, 0755); err != nil {
+		return err
+	}
 
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -140,7 +142,9 @@ func extractAndWriteFile(f *zip.File, dest string) error {
 	fpath := filepath.Join(dest, f.Name)
 
 	if f.FileInfo().IsDir() {
-		os.MkdirAll(fpath, f.Mode())
+		if err = os.MkdirAll(fpath, f.Mode()); err != nil {
+			return err
+		}
 	} else {
 		if err = os.MkdirAll(filepath.Dir(fpath), f.Mode()); err != nil {
 			return err

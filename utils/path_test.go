@@ -9,15 +9,15 @@ import (
 )
 
 func TestTaskSourceFilePath(t *testing.T) {
-	actual, err := TaskSourceFilePath("a")
+	_, err := TaskSourceFilePath("a")
 	if err == nil {
 		t.Errorf("TaskSourceFilePath(\"a\") without Contest.id set is expected to fail: %s", err)
 	}
 
 	viper.Set("contest.id", "practice")
-	home, err := homedir.Dir()
+	home, _ := homedir.Dir()
 
-	actual, err = TaskSourceFilePath("a")
+	actual, err := TaskSourceFilePath("a")
 	expected := filepath.Join(home, "atcoder", "practice", "a", "Main.cpp")
 	if err != nil || actual != expected {
 		t.Errorf("TaskSourceFilePath(\"a\") returned a wrong path: %s", actual)
