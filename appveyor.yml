@@ -15,6 +15,7 @@ install:
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
   - go env
+  - dep ensure
 
 test_script:
   - go test -v -race ./...
