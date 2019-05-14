@@ -1,6 +1,6 @@
 # atcli
 
-[![Build Status](https://travis-ci.com/gky360/atcli.svg?branch=master)](https://travis-ci.com/gky360/atcli)
+[![Build Status](https://travis-ci.org/gky360/atcli.svg?branch=master)](https://travis-ci.org/gky360/atcli)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/gky360/atcli?branch=master&svg=true)](https://ci.appveyor.com/project/gky360/atcli)
 [![GoDoc](https://godoc.org/github.com/gky360/atcli?status.svg)](https://godoc.org/github.com/gky360/atcli)
 
