@@ -114,9 +114,6 @@ func runWithSample(taskName string, sampleName string, isFull, isQuiet bool, out
 	if err != nil {
 		return "", err
 	}
-	if err != nil {
-		return "", err
-	}
 	if _, err := os.Stat(taskInputFilePath); err != nil {
 		if os.IsNotExist(err) {
 			return "", NewSampleInputNotExistError(fmt.Sprintf("Sample input not found: %s", taskInputFilePath))
@@ -147,7 +144,7 @@ func runWithSample(taskName string, sampleName string, isFull, isQuiet bool, out
 		return "", err
 	}
 
-	stdoutStr := string(stdoutBuf.Bytes())
+	stdoutStr := stdoutBuf.String()
 
 	return stdoutStr, nil
 }

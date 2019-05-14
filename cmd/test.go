@@ -151,15 +151,15 @@ func testWithSample(taskName string, sampleName string, isFull, isQuiet bool, ou
 	isPass := false
 	if strings.Compare(normalizeStr(res), normalizeStr(sampleOut)) == 0 {
 		successColor := color.New(color.FgGreen)
-		successColor.Fprintln(out, "Test: pass")
+		_, _ = successColor.Fprintln(out, "Test: pass")
 		isPass = true
 	} else {
 		failureColor := color.New(color.FgRed)
 		if !isQuiet {
-			failureColor.Fprintln(out, "Correct output:")
+			_, _ = failureColor.Fprintln(out, "Correct output:")
 			fmt.Fprintln(out, sampleOut)
 		}
-		failureColor.Fprintln(out, "Test: fail")
+		_, _ = failureColor.Fprintln(out, "Test: fail")
 	}
 
 	return isPass, nil

@@ -1,0 +1,23 @@
+clone_folder: c:\gopath\src\github.com\gky360\atcli
+clone_depth: 1
+
+environment:
+  GOPATH: c:\gopath
+
+stack: go 1.12
+
+install:
+  - set PATH=%GOPATH%\bin;c:\go\bin;C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin;%PATH%
+  - echo %PATH%
+  - echo %GOPATH%
+  - go version
+  - go env
+  - gcc --version
+
+  - go get -u github.com/golang/dep/...
+  - dep ensure
+
+build: off
+
+test_script:
+  - go test -v -race ./...

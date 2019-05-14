@@ -36,7 +36,7 @@ type RootOptions struct {
 }
 
 const (
-	Version = "v0.1.2"
+	Version = "v0.1.3"
 )
 
 var (
@@ -92,30 +92,30 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.host, "host", "H", "localhost", "atsrv host (aka. ATSRV_HOST)")
-	viper.BindEnv("host", "ATSRV_HOST")
-	viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
+	_ = viper.BindEnv("host", "ATSRV_HOST")
+	_ = viper.BindPFlag("host", rootCmd.PersistentFlags().Lookup("host"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.port, "port", "P", "4700", "atsrv port (aka. ATSRV_PORT)")
-	viper.BindEnv("port", "ATSRV_PORT")
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	_ = viper.BindEnv("port", "ATSRV_PORT")
+	_ = viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.userID, "user", "u", "", "user id of AtCoder (aka. ATSRV_USER_ID)")
-	viper.BindEnv("user.id", "ATSRV_USER_ID")
-	viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
+	_ = viper.BindEnv("user.id", "ATSRV_USER_ID")
+	_ = viper.BindPFlag("user.id", rootCmd.PersistentFlags().Lookup("user"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "auth-token", "a", "", "auth token for atsrv (aka. ATSRV_AUTH_TOKEN)")
-	viper.BindEnv("auth-token", "ATSRV_AUTH_TOKEN")
-	viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
+	_ = viper.BindEnv("auth-token", "ATSRV_AUTH_TOKEN")
+	_ = viper.BindPFlag("auth-token", rootCmd.PersistentFlags().Lookup("auth-token"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.token, "root", "r", utils.DefaultRootDir(), "root directory where atcli create files (aka. ATCLI_ROOT)")
-	viper.BindEnv("root", "ATCLI_ROOT")
-	viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
+	_ = viper.BindEnv("root", "ATCLI_ROOT")
+	_ = viper.BindPFlag("root", rootCmd.PersistentFlags().Lookup("root"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOpt.contestID, "contest", "c", "", "contest id of AtCoder (aka. ATCLI_CONTEST_ID)")
-	viper.BindEnv("contest.id", "ATCLI_CONTEST_ID")
-	viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
+	_ = viper.BindEnv("contest.id", "ATCLI_CONTEST_ID")
+	_ = viper.BindPFlag("contest.id", rootCmd.PersistentFlags().Lookup("contest"))
 
-	viper.BindEnv("cppTemplatePath", "ATCLI_CPP_TEMPLATE_PATH")
+	_ = viper.BindEnv("cppTemplatePath", "ATCLI_CPP_TEMPLATE_PATH")
 }
 
 // initConfig reads in config file and ENV variables if set.
