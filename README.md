@@ -1,5 +1,9 @@
 # atcli
 
+[![Build Status](https://travis-ci.com/gky360/atcli.svg?branch=master)](https://travis-ci.com/gky360/atcli)
+[![GoDoc](https://godoc.org/github.com/gky360/atcli?status.svg)](https://godoc.org/github.com/gky360/atcli)
+
+
 ```
         __           ___
        /\ \__       /\_ \    __
