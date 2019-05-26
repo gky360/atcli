@@ -29,6 +29,8 @@ import (
 
 type SubmitOptions struct {
 	Out, ErrOut io.Writer
+
+	assumeYes bool
 }
 
 var submitOpt = &SubmitOptions{
@@ -56,6 +58,7 @@ to AtCoder.`,
 
 func init() {
 	rootCmd.AddCommand(submitCmd)
+	submitCmd.Flags().BoolVarP(&submitOpt.assumeYes, "yes", "y", false, "assume that the answer to any question which would be asked is yes.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -71,6 +74,12 @@ func init() {
 func (opt *SubmitOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	contestID := viper.GetString("contest.id")
 	taskName := args[0]
+
+	if !opt.assumeYes && !utils.Confirm(fmt.Sprintf("submit task %s to %s?", taskName, contestID)) {
+		// do not submit the task
+		return nil
+	}
+
 	taskSourceFilePath, err := utils.TaskSourceFilePath(taskName)
 	if err != nil {
 		return err
