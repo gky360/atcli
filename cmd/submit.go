@@ -77,6 +77,7 @@ func (opt *SubmitOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 	if !opt.assumeYes && !utils.Confirm(fmt.Sprintf("submit task %s to %s?", taskName, contestID)) {
 		// do not submit the task
+		fmt.Fprintln(opt.Out, "Not submitted.")
 		return nil
 	}
 
