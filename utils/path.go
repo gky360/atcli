@@ -113,7 +113,15 @@ func TaskInputFilePath(taskName string, sampleName string, isForTestcases bool) 
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleInDir, sampleName+".txt"), nil
+
+	var filePath string
+	if isForTestcases {
+		filePath = filepath.Join(taskSampleInDir, sampleName)
+	} else {
+		filePath = filepath.Join(taskSampleInDir, sampleName+".txt")
+
+	}
+	return filePath, nil
 }
 
 func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
@@ -124,7 +132,15 @@ func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleOutDir, sampleName+".txt"), nil
+
+	var filePath string
+	if isForTestcases {
+		filePath = filepath.Join(taskSampleOutDir, sampleName)
+	} else {
+		filePath = filepath.Join(taskSampleOutDir, sampleName+".txt")
+
+	}
+	return filePath, nil
 }
 
 func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
@@ -136,11 +152,20 @@ func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
 		return nil, err
 	}
 
-	pat := filepath.Join(taskSampleInDir, "*.txt")
+	var pat string
+	if isForTestcases {
+		pat = filepath.Join(taskSampleInDir, "*")
+	} else {
+		pat = filepath.Join(taskSampleInDir, "*.txt")
+	}
 	g, _ := filepath.Glob(pat)
 	sampleNames := make([]string, len(g))
 	for i, fpath := range g {
-		sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+		if isForTestcases {
+			sampleNames[i] = filepath.Base(fpath)
+		} else {
+			sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+		}
 	}
 	return sampleNames, nil
 }
