@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	pb "gopkg.in/cheggaaa/pb.v2"
+	"github.com/cheggaaa/pb/v3"
 
 	"github.com/gky360/atsrv/models"
 )
@@ -83,7 +83,13 @@ func downloadFromUrl(url string, fpath string) error {
 	}
 	contentLength, _ := strconv.Atoi(resp.Header.Get("Content-Length"))
 
-	bar := pb.Full.Start(contentLength)
+	var barTemplate pb.ProgressBarTemplate
+	if contentLength == 0 {
+		barTemplate = pb.Default
+	} else {
+		barTemplate = pb.Full
+	}
+	bar := barTemplate.Start(contentLength)
 	defer bar.Finish()
 
 	reader := bar.NewProxyReader(resp.Body)
@@ -93,7 +99,6 @@ func downloadFromUrl(url string, fpath string) error {
 		return err
 	}
 
-	fmt.Println("Downloaded", fpath, ".")
 	return nil
 }
 
@@ -113,6 +118,7 @@ func unzip(src, dest string) error {
 
 	filesCnt := len(r.File)
 	bar := pb.Full.Start(filesCnt)
+	defer bar.Finish()
 
 	for _, f := range r.File {
 		bar.Set("prefix", fnameToPrefix(f.Name)).
@@ -123,8 +129,6 @@ func unzip(src, dest string) error {
 		}
 	}
 
-	bar.Finish()
-	fmt.Println("Unzipped", src, ".")
 	return nil
 }
 
