@@ -90,54 +90,51 @@ func TaskSampleDir(taskName string, isForTestcases bool) (string, error) {
 }
 
 func TaskSampleInDir(taskName string, isForTestcases bool) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(taskSampleDir, "in"), nil
+	return taskSampleDir(taskName, isForTestcases, true)
 }
 
 func TaskSampleOutDir(taskName string, isForTestcases bool) (string, error) {
+	return taskSampleDir(taskName, isForTestcases, false)
+}
+
+func taskSampleDir(taskName string, isForTestcases bool, isInput bool) (string, error) {
 	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleDir, "out"), nil
+
+	var name string
+	if isInput {
+		name = "in"
+	} else {
+		name = "out"
+	}
+
+	return filepath.Join(taskSampleDir, name), nil
 }
 
 func TaskInputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
-	if taskName == "" {
-		return "", fmt.Errorf(MsgTaskNameRequired)
-	}
-	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
-	if err != nil {
-		return "", err
-	}
-
-	var filePath string
-	if isForTestcases {
-		filePath = filepath.Join(taskSampleInDir, sampleName)
-	} else {
-		filePath = filepath.Join(taskSampleInDir, sampleName+".txt")
-
-	}
-	return filePath, nil
+	return taskFilePath(taskName, sampleName, isForTestcases, true)
 }
 
 func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
+	return taskFilePath(taskName, sampleName, isForTestcases, false)
+}
+
+func taskFilePath(taskName string, sampleName string, isForTestcases bool, isInput bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(taskName, isForTestcases)
+	dir, err := taskSampleDir(taskName, isForTestcases, isInput)
 	if err != nil {
 		return "", err
 	}
 
 	var filePath string
 	if isForTestcases {
-		filePath = filepath.Join(taskSampleOutDir, sampleName)
+		filePath = filepath.Join(dir, sampleName)
 	} else {
-		filePath = filepath.Join(taskSampleOutDir, sampleName+".txt")
+		filePath = filepath.Join(dir, sampleName+".txt")
 
 	}
 	return filePath, nil
