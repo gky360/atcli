@@ -306,12 +306,12 @@
   version = "v1.51.0"
 
 [[projects]]
-  digest = "1:41206f4d0410803e64cfb203f665330c3183988408cb532b56305a816a87bd99"
-  name = "gopkg.in/resty.v1"
+  digest = "1:e63cd05da63802f9af5033119ac3e4710052872ce3e1f947e1e95c973420c88f"
+  name = "gopkg.in/resty.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fa5875c0caa5c260ab78acec5a244215a730247f"
-  version = "v1.12.0"
+  revision = "de0735f66dae7abf8fb1073b4ace3032c1491424"
+  version = "v2.1.0"
 
 [[projects]]
   digest = "1:b75b3deb2bce8bc079e16bb2aecfe01eb80098f5650f9e93e5643ca8b7b73737"
@@ -332,7 +332,7 @@
     "github.com/mitchellh/go-homedir",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
-    "gopkg.in/resty.v1",
+    "gopkg.in/resty.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

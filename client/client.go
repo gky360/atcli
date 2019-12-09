@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"gopkg.in/resty.v1"
+	"gopkg.in/resty.v2"
 
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/handlers"
@@ -20,7 +20,7 @@ var Client *AtcliClient
 
 func NewClient(host, port string) *AtcliClient {
 	c := new(AtcliClient)
-	c.client = resty.
+	c.client = resty.New().
 		SetHostURL("http://" + host + ":" + port).
 		OnBeforeRequest(onBeforeRequest).
 		OnAfterResponse(onAfterResponse)
