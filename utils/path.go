@@ -90,41 +90,54 @@ func TaskSampleDir(taskName string, isForTestcases bool) (string, error) {
 }
 
 func TaskSampleInDir(taskName string, isForTestcases bool) (string, error) {
-	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(taskSampleDir, "in"), nil
+	return taskSampleDir(taskName, isForTestcases, true)
 }
 
 func TaskSampleOutDir(taskName string, isForTestcases bool) (string, error) {
+	return taskSampleDir(taskName, isForTestcases, false)
+}
+
+func taskSampleDir(taskName string, isForTestcases bool, isInput bool) (string, error) {
 	taskSampleDir, err := TaskSampleDir(taskName, isForTestcases)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleDir, "out"), nil
+
+	var name string
+	if isInput {
+		name = "in"
+	} else {
+		name = "out"
+	}
+
+	return filepath.Join(taskSampleDir, name), nil
 }
 
 func TaskInputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
-	if taskName == "" {
-		return "", fmt.Errorf(MsgTaskNameRequired)
-	}
-	taskSampleInDir, err := TaskSampleInDir(taskName, isForTestcases)
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(taskSampleInDir, sampleName+".txt"), nil
+	return taskFilePath(taskName, sampleName, isForTestcases, true)
 }
 
 func TaskOutputFilePath(taskName string, sampleName string, isForTestcases bool) (string, error) {
+	return taskFilePath(taskName, sampleName, isForTestcases, false)
+}
+
+func taskFilePath(taskName string, sampleName string, isForTestcases bool, isInput bool) (string, error) {
 	if taskName == "" {
 		return "", fmt.Errorf(MsgTaskNameRequired)
 	}
-	taskSampleOutDir, err := TaskSampleOutDir(taskName, isForTestcases)
+	dir, err := taskSampleDir(taskName, isForTestcases, isInput)
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(taskSampleOutDir, sampleName+".txt"), nil
+
+	var filePath string
+	if isForTestcases {
+		filePath = filepath.Join(dir, sampleName)
+	} else {
+		filePath = filepath.Join(dir, sampleName+".txt")
+
+	}
+	return filePath, nil
 }
 
 func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
@@ -136,11 +149,20 @@ func GetSampleNames(taskName string, isForTestcases bool) ([]string, error) {
 		return nil, err
 	}
 
-	pat := filepath.Join(taskSampleInDir, "*.txt")
+	var pat string
+	if isForTestcases {
+		pat = filepath.Join(taskSampleInDir, "*")
+	} else {
+		pat = filepath.Join(taskSampleInDir, "*.txt")
+	}
 	g, _ := filepath.Glob(pat)
 	sampleNames := make([]string, len(g))
 	for i, fpath := range g {
-		sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+		if isForTestcases {
+			sampleNames[i] = filepath.Base(fpath)
+		} else {
+			sampleNames[i] = strings.TrimSuffix(filepath.Base(fpath), ".txt")
+		}
 	}
 	return sampleNames, nil
 }

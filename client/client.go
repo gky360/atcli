@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"gopkg.in/resty.v2"
+	"github.com/go-resty/resty/v2"
 
 	"github.com/gky360/atcli/utils"
 	"github.com/gky360/atsrv/handlers"
