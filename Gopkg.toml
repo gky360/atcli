@@ -49,6 +49,10 @@
   name = "gopkg.in/resty.v1"
   version = "1.9.1"
 
+[[constraint]]
+  name = "github.com/cheggaaa/pb"
+  version = "3.0.3"
+
 [prune]
   go-tests = true
   unused-packages = true

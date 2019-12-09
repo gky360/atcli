@@ -2,6 +2,25 @@
 
 
 [[projects]]
+  digest = "1:e626376fab8608a972d47e91b3c1bbbddaecaf1d42b82be6dcc52d10a7557893"
+  name = "github.com/VividCortex/ewma"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b24eb346a94c3ba12c1da1e564dbac1b498a77ce"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:32b52c54987da7f5b958d9fd5a671ebc1dfbad0dbba1099a2883576ffc7055f4"
+  name = "github.com/cheggaaa/pb"
+  packages = [
+    "v3",
+    "v3/termutil",
+  ]
+  pruneopts = "UT"
+  revision = "e2fc8a7ecc44accb2ab1cfae39909553d83827c7"
+  version = "v3.0.3"
+
+[[projects]]
   digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
   name = "github.com/fatih/color"
   packages = ["."]
@@ -100,6 +119,14 @@
   pruneopts = "UT"
   revision = "1311e847b0cb909da63b5fecfb5370aa66236465"
   version = "v0.0.8"
+
+[[projects]]
+  digest = "1:871aa208665f8c57d13ed13899c243454858ee6654cc4feed768096bcea6fbc3"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "18c3d09a134a52720932bbaa92c798a0ab111004"
+  version = "v0.0.7"
 
 [[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
@@ -263,57 +290,6 @@
   version = "v0.3.2"
 
 [[projects]]
-  digest = "1:e626376fab8608a972d47e91b3c1bbbddaecaf1d42b82be6dcc52d10a7557893"
-  name = "gopkg.in/VividCortex/ewma.v1"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "b24eb346a94c3ba12c1da1e564dbac1b498a77ce"
-  version = "v1.1.1"
-
-[[projects]]
-  digest = "1:495f9b42208e426f00d10b5bdaf4f7af2d0f56c20483136caca6ef5e2531e801"
-  name = "gopkg.in/cheggaaa/pb.v2"
-  packages = [
-    ".",
-    "termutil",
-  ]
-  pruneopts = "UT"
-  revision = "c112833d014c77e8bde723fd0158e3156951639f"
-  version = "v2.0.6"
-
-[[projects]]
-  digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
-  name = "gopkg.in/fatih/color.v1"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
-  version = "v1.7.0"
-
-[[projects]]
-  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
-  name = "gopkg.in/mattn/go-colorable.v0"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
-  version = "v0.0.9"
-
-[[projects]]
-  digest = "1:9b90c7639a41697f3d4ad12d7d67dfacc9a7a4a6e0bbfae4fc72d0da57c28871"
-  name = "gopkg.in/mattn/go-isatty.v0"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "1311e847b0cb909da63b5fecfb5370aa66236465"
-  version = "v0.0.8"
-
-[[projects]]
-  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
-  name = "gopkg.in/mattn/go-runewidth.v0"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
-  version = "v0.0.4"
-
-[[projects]]
   digest = "1:41206f4d0410803e64cfb203f665330c3183988408cb532b56305a816a87bd99"
   name = "gopkg.in/resty.v1"
   packages = ["."]
@@ -333,13 +309,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/cheggaaa/pb/v3",
     "github.com/fatih/color",
     "github.com/gky360/atsrv/handlers",
     "github.com/gky360/atsrv/models",
     "github.com/mitchellh/go-homedir",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
-    "gopkg.in/cheggaaa/pb.v2",
     "gopkg.in/resty.v1",
   ]
   solver-name = "gps-cdcl"
