@@ -26,7 +26,8 @@ import (
 )
 
 type GetTaskOptions struct {
-	Out, ErrOut io.Writer
+	Out, ErrOut   io.Writer
+	isWithSamples bool
 }
 
 var getTaskOpt = &GetTaskOptions{
@@ -55,6 +56,7 @@ When you specify task name, one task will be returned.`,
 
 func init() {
 	getCmd.AddCommand(getTaskCmd)
+	getTaskCmd.Flags().BoolVarP(&getTaskOpt.isWithSamples, "with-samples", "s", false, "get tasks with sample inputs and outputs.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -84,7 +86,7 @@ func (opt *GetTaskOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		fmt.Fprintln(opt.Out, taskYaml)
 	} else {
-		_, tasks, err := Client.GetTasks(contestID, false)
+		_, tasks, err := Client.GetTasks(contestID, opt.isWithSamples)
 		if err != nil {
 			return err
 		}
