@@ -36,7 +36,7 @@ type RootOptions struct {
 }
 
 const (
-	Version = "v0.2.2"
+	Version = "v0.3.0"
 )
 
 var (
